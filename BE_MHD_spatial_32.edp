@@ -1,0 +1,245 @@
+load "Element_P3";
+real s0=clock();
+verbosity = 0;
+
+real nu=0.01;
+real num=0.1;
+real gamma=10000000.0;
+real mu=1;
+
+
+
+real L2H1Erroru=0;
+real L2H1Errorw=0;
+
+   mesh th = readmesh("SVgrid32.msh");
+    
+
+   fespace Vh2(th,P2);
+   fespace Vh(th,P1dc);
+   
+   real H1Erroru = 0.0;
+   real H1Errorw = 0.0;
+   
+
+   Vh2 u2,v2,un1,un2, w1,w2;
+   Vh2 u1,v1, wn1, wn2;
+   Vh pp,qp,pm,qm;
+
+
+
+
+   int nbiter = 8;
+   real dt = 0.001/nbiter;
+
+   int iter=0;
+
+   real t;
+   real time=0.0;
+   
+   
+
+  func f1 = exp(t)*sin(y)-cos(x+y)+(nu+num)/2.0*(cos(y)+(1.0+exp(t))*sin(y))
+                       +(sin(x)-(1.0+exp(t))*cos(x))*(-sin(y)+(1.0+exp(t))*cos(y))
+                       +(nu-num)/2.0*(cos(y)-(1.0+exp(t))*sin(y));
+   
+  func f2 = exp(t)*cos(x)-cos(x+y)+(nu+num)/2.0*(sin(x)+(1.0+exp(t))*cos(x))
+                       +(cos(x)-(1.0+exp(t))*sin(x))*(cos(y)-(1.0+exp(t))*sin(y))
+                       +(nu-num)/2.0*(sin(x)-(1.0+exp(t))*cos(x));
+  
+  
+  func g1 = -exp(t)*sin(y)+cos(x+y)+(nu+num)/2.0*(cos(y)-(1.0+exp(t))*sin(y))
+                        +(sin(x)+(1.0+exp(t))*cos(x))*(-sin(y)-(1.0+exp(t))*cos(y))
+                        +(nu-num)/2.0*(cos(y)+(1.0+exp(t))*sin(y));
+                        
+  func g2 = -exp(t)*cos(x)+cos(x+y)+(nu+num)/2.0*(sin(x)-(1.0+exp(t))*cos(x))
+                        +(cos(y)+(1.0+exp(t))*sin(y))*(cos(x)+(1.0+exp(t))*sin(x))
+                        +(nu-num)/2.0*(sin(x)+(1.0+exp(t))*cos(x));
+  
+  
+  
+
+  func pres = -sin(x+y);
+
+  func utrue1 = cos(y)+(1+exp(t))*sin(y);
+  func utrue2 = sin(x)+(1+exp(t))*cos(x);
+  func wtrue1 = cos(y)-(1+exp(t))*sin(y);
+  func wtrue2 = sin(x)-(1+exp(t))*cos(x);
+
+  func utrue1x = 0;
+  func utrue1y = -sin(y)+(1+exp(t))*cos(y);
+  func utrue2x = cos(x)-(1+exp(t))*sin(x);
+  func utrue2y = 0;
+
+  func wtrue1x = 0;
+  func wtrue1y = -sin(y)-(1+exp(t))*cos(y);
+  func wtrue2x = cos(x)+(1+exp(t))*sin(x);
+  func wtrue2y = 0;
+
+  
+problem BackwardEuler1 ([u1,u2,pp],[v1,v2,qp],solver=UMFPACK) =
+
+    int2d(th)(
+     // 1.0/dt (u_h^{n+1},v_h^{n+1})
+
+           1.0/dt * ( u1*v1 + u2*v2 )
+
+     // +gamma*(div u, div v)
+     //   + gamma*(dx(u1)+dy(u2))*(dx(v1)+dy(v2))
+
+     // -(q^{n+1},div v_h^{n+1})
+
+            - pp * ( dx(v1) + dy(v2) )
+
+     // (bnu+bnum)/2.0*(grad u_h^{n+1},grad v_h^{n+1})
+
+            + (nu+num)/2.0 *  ( dx(u1)*dx(v1) + dy(u1)*dy(v1) + dx(u2)*dx(v2) + dy(u2)*dy(v2) )
+
+     //+(meanw^n*grad u_h^{n+1},v_h^{n+1})
+            +(v1 * (wn1 * dx(u1) + wn2 * dy(u1)) + v2 * (wn1 * dx(u2) + wn2 * dy(u2)))
+
+     // (div u_h^{n+1},q)
+
+           + qp * (dx(u1) + dy(u2))
+     // eps(pp,qp)
+           + pp*qp*(0.0000000001)
+         )
+    + int2d(th)(
+     // -1/dt (u_h^n,v_h^{n+1})
+           -1.0 / dt * (un1 * v1 + un2 * v2)
+
+        // +(nu-num)/2.0*(grad w_h^n,grad v_h^{n+1})
+           +(nu-num)/2.0*(dx(wn1)*dx(v1)+dy(wn1)*dy(v1)+dx(wn2)*dx(v2)+dy(wn2)*dy(v2))
+
+
+        // (fp,v)
+        - (f1*v1 + f2*v2)
+
+              )
+   + on(1,2,3,4, u1 =  utrue1, u2 = utrue2);
+  
+
+   problem BackwardEuler2 ([w1,w2,pm],[v1,v2,qm],solver=UMFPACK) =
+
+    int2d(th)(
+     // 1./dt (w_h^{n+1},v_h^{n+1})
+
+           1./dt * ( w1*v1 + w2*v2 )
+
+     // +gamma* (div w, div v)
+     //  + gamma*(dx(w1)+dy(w2))*(dx(v1)+dy(v2))
+
+     // -(r_h^{n+1},div v_h^{n+1})
+
+            - pm * ( dx(v1) + dy(v2) )
+
+     // +(bnu+bnum)/2.0*(grad w_h^{n+1},grad v_h^{n+1})
+            + (nu+num)/2.0 * ( dx(w1)*dx(v1) + dy(w1)*dy(v1) + dx(w2)*dx(v2) + dy(w2)*dy(v2) )
+
+
+
+    //+(meanu^n*grad w_h^{n+1},v_h^{n+1})
+            +(v1 * (un1 * dx(w1) + un2 * dy(w1)) + v2 * (un1 * dx(w2) + un2 * dy(w2)))
+
+
+    // (div w_h^{n+1},r)
+
+           + qm * (dx(w1) + dy(w2))
+     // eps(pm,qm)
+           + pm*qm*(0.0000000001)
+         )
+    + int2d(th)(
+     // -1/dt (w_h^n,v_h^{n+1})
+
+           -1.0 / dt * (wn1 * v1 + wn2 * v2)
+     // +(nu-num)/2.0*(grad u_h^n,grad v_h^{n+1})
+
+           +(nu-num)/2.0*(dx(un1)*dx(v1)+dy(un1)*dy(v1)+ dx(un2)*dx(v2)+dy(un2)*dy(v2))
+
+
+        // (f2,v_h^{n+1})
+          - (g1*v1 + g2*v2)
+            )
+      + on(1,2,3,4, w1 = wtrue1, w2 =  wtrue2);
+
+
+
+   // Initializing at time t=0.0
+     
+     t=0;
+
+
+
+     pp = 0;
+     pm = 0;
+
+     un1 = utrue1;
+     un2 = utrue2;
+     wn1 = wtrue1;
+     wn2 = wtrue2;
+
+    for (iter = 1; iter <= nbiter; iter++) {
+
+        t = dt*iter;
+        time = t;
+
+
+        BackwardEuler1;
+        BackwardEuler2;
+
+        
+          un1=u1;
+          un2=u2;
+          wn1=w1;
+          wn2=w2;
+
+        
+
+        H1Erroru = H1Erroru + int2d(th)((dx(u1)-utrue1x)^2+(dy(u1)-utrue1y)^2+(dx(u2)-utrue2x)^2+(dy(u2)-utrue2y)^2);
+        H1Errorw = H1Errorw + int2d(th)((dx(w1)-wtrue1x)^2+(dy(w1)-wtrue1y)^2+(dx(w2)-wtrue2x)^2+(dy(w2)-wtrue2y)^2);
+
+        cout<< "***********************************************************************"<<endl;
+        cout<< "Timestep = " << iter <<" Time = "<<t<<"   H1Erroru="<<H1Erroru << "   H1Errorv= "<<H1Errorw<< endl ;
+        cout<< "***********************************************************************"<<endl;
+      
+      
+      
+        
+    }
+    L2H1Erroru = sqrt(dt*H1Erroru);
+    L2H1Errorw = sqrt(dt*H1Errorw);
+    
+      cout<< "***********************************************************************"<<endl;
+      cout<< "    H1Erroru="<<L2H1Erroru<<"   H1Errorw="<<L2H1Errorw<< endl ;
+      cout<< "***********************************************************************"<<endl;
+
+
+cout<<L2H1Erroru<<"    "<<L2H1Errorw<<endl;
+/*
+cout<<L2H1Erroru(1)<<"    "<<L2H1Errorw(1)<<endl;
+cout<<L2H1Erroru(2)<<"    "<<L2H1Errorw(2)<<endl;
+//cout<<L2H1Erroru(3)<<"    "<<L2H1Errorw(3)<<endl;
+//cout<<L2H1Erroru(4)<<"    "<<L2H1Errorw(4)<<endl;
+
+cout<<"Convergence rate for v"<<endl;
+for (int i = 0; i < 2; i++){
+  cout<<" convergence rate = "<<log(L2H1Erroru(i)/L2H1Erroru(i+1))/log(2.)<<endl;
+}
+
+
+cout<<"Convergence rate for w"<<endl;
+
+
+
+for (int i = 0; i < 4; i++){
+  cout<<" convergence rate = "<<log(L2H1Errorw(i)/L2H1Errorw(i+1))/log(2.)<<endl;
+}
+
+*/
+
+
+
+
+
+
+
