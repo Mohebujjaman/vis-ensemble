@@ -1,0 +1,564 @@
+load "Element_P3";
+real s0=clock();
+real [int] L2H1Erroru(8);
+real [int] L2H1Errorw(8);
+
+// This code is written for testing 2nd order temporal convergence of higher order ensemble scheme
+verbosity = 0;
+
+int J=20;
+real [int] random1=[0.975712,-0.345349,-0.166474,-0.081588,0.088924,0.640705,-0.607515,-0.022931,0.635968,0.847934,0.242202,0.055026,-0.695076,0.886830,-0.724688,-0.162158,0.521596,-0.688013,0.453780,-0.325601];
+real [int] random2=[-0.6913,-0.66843,-0.50354,-0.29051,0.3903,0.92443, 0.83926,-0.36649,0.50861,-0.80312,-0.84655,-0.53271,-0.56113,0.50248,-0.39143,-0.26209,0.43597,0.95061,-0.39465,-0.19279];
+real [int] coef=[-1,1,-2,2,-3,3,-4,4,-5,5,-6,6,-7,7,-8,8,-9,9,-10,10];
+real factor=1;
+
+
+  
+for (int i=0;i<8;i++){
+   L2H1Erroru(i) = 0.0;
+   L2H1Errorw(i) = 0.0;
+}  
+
+real ep1 = 0.001;
+real ep = 0.0;
+real reynolds = 100.0;
+real nu = 1./reynolds;
+real num= 1.0/1000.0;
+real theta=1.0/9.0;
+real gamma=100000.0;
+real bnum;
+real bnu;
+verbosity = 0;
+real sum=0.0;
+
+
+   for (int j=0;j<J;j++){
+     sum = sum +0.01+random1(j)/1000.0*factor;
+   }
+
+   bnu=sum/real(J);
+
+   sum=0.0;
+
+   for (int j=0;j<J;j++){
+     sum = sum +0.001+random2(j)/10000.0*factor;
+   }
+
+   bnum=sum/real(J);
+
+cout<<"bnu="<<bnu<<"  "<<"bnum="<<bnum<<endl;
+
+real ev1,ev2,ev3,ev4,evm;
+real eb1,eb2,eb3,eb4,ebm;
+
+for ( int k=0; k<5; k++){
+
+//   mesh th1 = square(16,16);
+//   if(k==0)
+//      mesh th1 = readmesh("SVgrid4.msh");
+//   else if (k==1)
+//      mesh th1 = readmesh("SVgrid8.msh");
+//   else if (k==2)
+//      mesh th1 = readmesh("SVgrid16.msh");
+//   else if (k==3)
+//      mesh th1 = readmesh("SVgrid32.msh");
+//   else
+//      mesh th1 = readmesh("SVgrid64.msh");
+    
+   mesh th= square(32,32);
+
+   fespace Vh2(th,P2);
+   fespace Vh(th,P1);
+   
+   real H1Erroru = 0.0;
+   real H1Errorw = 0.0;
+   
+
+   Vh2  meanu1,meanu2,meanw1, meanw2;
+   Vh2 u2,v2,un1,un2,unn1, unn2, w1,w2;
+   Vh2 u1,v1, wn1, wn2, wnn1, wnn2; 
+   Vh pp,qp,pm,qm;
+
+   Vh2 sumun1, sumun2, sumwn1, sumwn2;
+   Vh2 sumunn1, sumunn2, sumwnn1, sumwnn2;
+
+   Vh2 [int] ann(J),bnn(J),cnn(J),dnn(J);
+   Vh2 [int] an(J),bn(J),cn(J),dn(J);
+
+   int nbiter = 2^(k+2);
+   real dt = 1.0/nbiter;
+
+   int iter=0;
+
+   real t;
+   real time=0.0;
+   
+  ofstream data1("energy1");   
+
+  func f1 = (1.0+ep) *exp(t)*sin(y)+cos(x+y)*(1.0+exp(t))+(1.0+ep) *(nu+num)/2.0*(cos(y)+(1.0+exp(t))*sin(y))
+                       +(1.0+ep) *(1.0+ep) *(sin(x)-(1.0+exp(t))*cos(x))*(-sin(y)+(1.0+exp(t))*cos(y))
+                       +(1.0+ep) *(nu-num)/2.0*(cos(y)-(1.0+exp(t))*sin(y));
+   
+  func f2 = (1.0+ep) *exp(t)*cos(x)+cos(x+y)*(1.0+exp(t))+(1.0+ep) *(nu+num)/2.0*(sin(x)+(1.0+exp(t))*cos(x))
+                       +(1.0+ep) *(1.0+ep) *(cos(x)-(1.0+exp(t))*sin(x))*(cos(y)-(1.0+exp(t))*sin(y))
+                       +(1.0+ep) *(nu-num)/2.0*(sin(x)-(1.0+exp(t))*cos(x));
+  
+  
+  func g1 = -(1.0+ep) *exp(t)*sin(y)+cos(x+y)*(1.0+exp(t))+(1.0+ep) *(nu+num)/2.0*(cos(y)-(1.0+exp(t))*sin(y))
+                        +(1.0+ep) *(1.0+ep) *(sin(x)+(1.0+exp(t))*cos(x))*(-sin(y)-(1.0+exp(t))*cos(y))
+                        +(1.0+ep) *(nu-num)/2.0*(cos(y)+(1.0+exp(t))*sin(y));
+                        
+  func g2 = -(1.0+ep) *exp(t)*cos(x)+cos(x+y)*(1.0+exp(t))+(1.0+ep) *(nu+num)/2.0*(sin(x)-(1.0+exp(t))*cos(x))
+                        +(1.0+ep) *(1.0+ep)*(cos(y)+(1.0+exp(t))*sin(y))*(cos(x)+(1.0+exp(t))*sin(x))
+                        +(1.0+ep) *(nu-num)/2.0*(sin(x)+(1.0+exp(t))*cos(x));
+  
+  
+  
+
+
+
+  func pres = sin(x+y)*(1+exp(t));
+
+  func utrue1 = cos(y)+(1+exp(t))*sin(y);
+  func utrue2 = sin(x)+(1+exp(t))*cos(x);
+  func wtrue1 = cos(y)-(1+exp(t))*sin(y);
+  func wtrue2 = sin(x)-(1+exp(t))*cos(x);
+
+  func utrue1x = 0;
+  func utrue1y = -sin(y)+(1+exp(t))*cos(y);
+  func utrue2x = cos(x)-(1+exp(t))*sin(x);
+  func utrue2y = 0;
+
+  func wtrue1x = 0;
+  func wtrue1y = -sin(y)-(1+exp(t))*cos(y);
+  func wtrue2x = cos(x)+(1+exp(t))*sin(x);
+  func wtrue2y = 0;
+
+// Define the problem to compute the second initial condition
+  
+problem BackwardEuler1 ([u1,u2,pp],[v1,v2,qp],solver=UMFPACK) =
+
+    int2d(th)(
+     // 1.0/dt (u_h^{n+1},v_h^{n+1})
+
+           1.0/dt * ( u1*v1 + u2*v2 )
+
+     // +gamma*(div u, div v)
+        + gamma*(dx(u1)+dy(u2))*(dx(v1)+dy(v2))
+
+     // -(q^{n+1},div v_h^{n+1})
+
+            - pp * ( dx(v1) + dy(v2) )
+
+     // (bnu+bnum)/2.0*(grad u_h^{n+1},grad v_h^{n+1})
+
+            + (bnu+bnum)/2.0 *  ( dx(u1)*dx(v1) + dy(u1)*dy(v1) + dx(u2)*dx(v2) + dy(u2)*dy(v2) )
+
+     //+(<w>^n*grad u_h^{n+1},v_h^{n+1})
+            +(v1 * (meanw1 * dx(u1) + meanw2 * dy(u1)) + v2 * (meanw1 * dx(u2) + meanw2 * dy(u2)))
+
+     // (div u_h^{n+1},q)
+
+           + qp * (dx(u1) + dy(u2))
+     // eps(pp,qp)
+           + pp*qp*(0.0000000001)
+         )
+    + int2d(th)(
+     // -1/dt (u_h^n,v_h^{n+1})
+           -1.0 / dt * (un1 * v1 + un2 * v2)
+
+       //+(nu_j_prime+num_j_prime)/2.0(grad(2 u_h^n-u_h^{n-1},grad v_h)
+
+        +(nu+num-bnu-bnum)/2.0*(dx(un1)*dx(v1)+dy(un1)*dy(v1)+dx(un2)*dx(v2)+dy(un2)*dy(v2))
+
+        // +(nu-num)/2.0*(grad w_h^n,grad v_h^{n+1})
+
+
+           +(nu-num)/2.0*(dx(wn1)*dx(v1)+dy(wn1)*dy(v1)+dx(wn2)*dx(v2)+dy(wn2)*dy(v2))
+
+
+    // ((w_h^n-<w>^n).grad (u_h^n),v^{n+1})
+
+          + (v1 *(( wn1-meanw1) * dx(un1) + (wn2-meanw2) * dy(un1)) + v2 * ((wn1-meanw1) * dx(un2) + (wn2-meanw2) * dy(un2)))
+
+        // (fp,v)
+        - (f1*v1 + f2*v2)
+
+              )
+   + on(1,2,3,4, u1 = (1.0+ep) * utrue1, u2 = (1.0+ep) * utrue2);
+  
+
+   problem BackwardEuler2 ([w1,w2,pm],[v1,v2,qm],solver=UMFPACK) =
+
+    int2d(th)(
+     // 1./dt (w_h^{n+1},v_h^{n+1})
+
+           1./dt * ( w1*v1 + w2*v2 )
+
+     // +gamma* (div w, div v)
+       + gamma*(dx(w1)+dy(w2))*(dx(v1)+dy(v2))
+
+     // -(r_h^{n+1},div v_h^{n+1})
+
+            - pm * ( dx(v1) + dy(v2) )
+
+     // +(bnu+bnum)/2.0*(grad w_h^{n+1},grad v_h^{n+1})
+
+            + (bnu+bnum)/2.0 *  ( dx(w1)*dx(v1) + dy(w1)*dy(v1) + dx(w2)*dx(v2) + dy(w2)*dy(v2) )
+
+    //+(<v>^n*grad w_h^{n+1},v_h^{n+1})
+     +(v1 * (meanu1 * dx(w1) + meanu2 * dy(w1)) + v2 * (meanu1 * dx(w2) + meanu2 * dy(w2)))
+
+
+
+    // (div w_h^{n+1},r)
+
+           + qm * (dx(w1) + dy(w2))
+     // eps(pm,qm)
+           + pm*qm*(0.0000000001)
+         )
+    + int2d(th)(
+     // -1/dt (w_h^n,v_h^{n+1})
+
+           -1.0 / dt * (wn1 * v1 + wn2 * v2)
+     // +(nu-num)/2.0*(grad u_h^n,grad v_h^{n+1})
+
+           +(nu-num)/2.0*(dx(un1)*dx(v1)+dy(un1)*dy(v1)+ dx(un2)*dx(v2)+dy(un2)*dy(v2))
+
+     //+(nu_j_prime+num_j_prime)/2.0(grad(2 w_h^n-w_h^{n-1},grad v_h)
+
+        +(nu+num-bnu-bnum)/2.0*(dx(wn1)*dx(v1)+dy(wn1)*dy(v1)+dx(wn2)*dx(v2)+dy(wn2)*dy(v2))
+
+     // +((u_h^n-<u>^n).grad w_h^n,v^{n+1})
+
+       +(v1 * ((un1-meanu1) * dx(wn1) + (un2-meanu2) * dy(wn1)) + v2 * ((un1-meanu1) * dx(wn2) + (un2-meanu2) * dy(wn2)))
+
+
+        // (f2,v_h^{n+1})
+          - (g1*v1 + g2*v2)
+            )
+      + on(1,2,3,4, w1 = (1.0+ep) * wtrue1, w2 = (1.0+ep)* wtrue2);
+
+
+
+
+
+ //Here is the main scheme
+
+
+
+   problem ElsasserStep1 ([u1,u2,pp],[v1,v2,qp],solver=UMFPACK) =
+
+    int2d(th)(
+     // 1.5/dt (u_h^{n+1},v_h^{n+1})  
+ 
+           1.5/dt * ( u1*v1 + u2*v2 )
+ 
+     // +gamma*(div u, div v)
+        + gamma*(dx(u1)+dy(u2))*(dx(v1)+dy(v2))
+
+     // -(q^{n+1},div v_h^{n+1})   
+ 
+            - pp * ( dx(v1) + dy(v2) )
+ 
+     // (bnu+bnum)/2.0*(grad u_h^{n+1},grad v_h^{n+1})  
+ 
+            + (bnu+bnum)/2.0 *  ( dx(u1)*dx(v1) + dy(u1)*dy(v1) + dx(u2)*dx(v2) + dy(u2)*dy(v2) )
+
+     //+(<w>^n*grad u_h^{n+1},v_h^{n+1})  
+            +(v1 * (meanw1 * dx(u1) + meanw2 * dy(u1)) + v2 * (meanw1 * dx(u2) + meanw2 * dy(u2)))
+  
+      
+     
+
+     // (div u_h^{n+1},q)  
+ 
+           + qp * (dx(u1) + dy(u2))
+     // eps(pp,qp)
+           + pp*qp*(0.0000000001)
+         )
+    + int2d(th)(
+     // -2/dt (u_h^n,v_h^{n+1}) 
+           -2.0 / dt * (un1 * v1 + un2 * v2)
+
+      //+0.5/dt (u_h^{n-1},v_h^{n+1})
+        +0.5/dt * (unn1 * v1 + unn2 * v2)
+
+       //+(nu_j_prime+num_j_prime)/2.0(grad(2 u_h^n-u_h^{n-1},grad v_h)
+
+        +(nu+num-bnu-bnum)*(dx(un1)*dx(v1)+dy(un1)*dy(v1)+dx(un2)*dx(v2)+dy(un2)*dy(v2))
+        -(nu+num-bnu-bnum)/2.0*(dx(unn1)*dx(v1)+dy(unn1)*dy(v1)+dx(unn2)*dx(v2)+dy(unn2)*dy(v2))      
+
+	// +(nu-num)/2.0*theta*(2*grad w_h^n-grad u_h^{n-1},grad w_h^{n+1})  
+        // +(nu-num)/2.0*(1-theta)*(grad w_h^n, grad w_h^{n+1})  
+  
+           +(nu-num)/2.0*(1.0+theta)*(dx(wn1)*dx(v1)+dy(wn1)*dy(v1)+dx(wn2)*dx(v2)+dy(wn2)*dy(v2))
+           -(nu-num)/2.0*theta*(dx(wnn1)*dx(v1)+dy(wnn1)*dy(v1)+dx(wnn2)*dx(v2)+dy(wnn2)*dy(v2))
+
+    
+    // ((2w_h^n-w_h^{n-1}-<w>^n).grad (2u_h^n-u_h^{n-1}),v^{n+1})  
+
+          + 2.0*(v1 * ((2.0* wn1-wnn1-meanw1) * dx(un1) + (2.0*wn2-wnn2-meanw2) * dy(un1)) + v2 * ((2.0*wn1-wnn1-meanw1) * dx(un2) + (2.0*wn2-wnn2-meanw2) * dy(un2)))
+          - (v1 * ((2.0*wn1-wnn1-meanw1) * dx(unn1) + (2.0*wn2-wnn2-meanw2) * dy(unn1)) + v2 * ((2.0*wn1-wnn1-meanw1) * dx(unn2) + (2.0*wn2-wnn2-meanw2) * dy(unn2)))
+
+	// (fp,v) 
+	- (f1*v1 + f2*v2)
+
+              )
+   + on(1,2,3,4, u1 = (1.0+ep) * utrue1, u2 = (1.0+ep) * utrue2); 
+ 
+ 
+ 
+ 
+   problem ElsasserStep2 ([w1,w2,pm],[v1,v2,qm],solver=UMFPACK) =
+
+    int2d(th)(
+     // 1.5/dt (w_h^{n+1},v_h^{n+1})  
+ 
+           1.5/dt * ( w1*v1 + w2*v2 )
+ 
+     // +gamma* (div w, div v)
+       + gamma*(dx(w1)+dy(w2))*(dx(v1)+dy(v2))
+
+     // -(r_h^{n+1},div v_h^{n+1}) 
+ 
+            - pm * ( dx(v1) + dy(v2) )
+ 
+     // +(bnu+bnum)/2.0*(grad w_h^{n+1},grad v_h^{n+1}) 
+ 
+            + (bnu+bnum)/2.0 *  ( dx(w1)*dx(v1) + dy(w1)*dy(v1) + dx(w2)*dx(v2) + dy(w2)*dy(v2) )
+ 
+    //+(<v>^n*grad w_h^{n+1},v_h^{n+1})  
+     +(v1 * (meanu1 * dx(w1) + meanu2 * dy(w1)) + v2 * (meanu1 * dx(w2) + meanu2 * dy(w2)))
+
+
+   
+ 
+     // (div w_h^{n+1},r)  
+ 
+           + qm * (dx(w1) + dy(w2))
+     // eps(pm,qm)
+           + pm*qm*(0.0000000001)
+         )
+    + int2d(th)(
+     // -2/dt (w_h^n,v_h^{n+1}) 
+
+           -2.0 / dt * (wn1 * v1 + wn2 * v2)
+     //+0.5 /dt *(w_h^{n-1},v_h^{n+1})
+
+       +0.5/dt * (wnn1 * v1 + wnn2 * v2)
+
+      //+(nu_j_prime+num_j_prime)/2.0(grad(2 w_h^n-w_h^{n-1},grad v_h)
+
+        +(nu+num-bnu-bnum)*(dx(wn1)*dx(v1)+dy(wn1)*dy(v1)+dx(wn2)*dx(v2)+dy(wn2)*dy(v2))
+        -(nu+num-bnu-bnum)/2.0*(dx(wnn1)*dx(v1)+dy(wnn1)*dy(v1)+dx(wnn2)*dx(v2)+dy(wnn2)*dy(v2))
+
+     // +(nu-num)/2.0*theta*(2*grad u_h^n-grad u_h^{n-1},grad v_h^{n+1})
+     // +(nu-num)/2.0*(1-theta)*(grad u_h^{n-1},grad v_h^{n+1})  
+
+           +(nu-num)/2.0*(1+theta)*(dx(un1)*dx(v1)+dy(un1)*dy(v1)+ dx(un2)*dx(v2)+dy(un2)*dy(v2))
+           -(nu-num)/2.0*theta*(dx(unn1)*dx(v1)+dy(unn1)*dy(v1)+ dx(unn2)*dx(v2)+dy(unn2)*dy(v2))
+
+   
+     // +((2*u_h^n-u_h^{n-1}-<u>^n).grad (2*w_h^n-w_h^{n-1}),v^{n+1})  
+
+       +2.0 * (v1 * ((2.0 *un1-unn1-meanu1) * dx(wn1) + (2.0*un2-unn2-meanu2) * dy(wn1)) + v2 * ((2.0*un1-unn1-meanu1) * dx(wn2) + (2.0*un2-unn2-meanu2) * dy(wn2)))
+       -(v1 * ((2.0* un1-unn1-meanu1) * dx(wnn1) + (2.0*un2-unn2-meanu2) * dy(wnn1)) + v2 * ((2.0*un1-unn1-meanu1) * dx(wnn2) + (2.0*un2-unn2-meanu2) * dy(wnn2)))
+
+
+	// (f2,v_h^{n+1}) 
+	  - (g1*v1 + g2*v2)
+            )
+      + on(1,2,3,4, w1 = (1.0+ep) * wtrue1, w2 = (1.0+ep)* wtrue2);
+
+
+   // Initializing at time t=0.0
+
+     
+     t=0;
+
+   for(int j=0;j<J;j++){
+
+      ep = ep1*coef(j)/5.0;
+     
+      ann[j] = (1.0 + ep)*utrue1;
+      bnn[j] = (1.0 + ep)*utrue2;
+      cnn[j] = (1.0 + ep)*wtrue1;
+      dnn[j] = (1.0 + ep)*wtrue2;
+    }
+
+
+   pp = 0;
+   pm = 0;
+
+   t=dt;
+
+   meanu1 = 0.0;
+   meanu2 = 0.0;
+   meanw1 = 0.0;
+   meanw2 = 0.0;
+
+   for(int j=0;j<J;++j){
+     meanu1 = meanu1 + ann[j]/real(J);
+     meanu2 = meanu2 + bnn[j]/real(J);
+     meanw1 = meanw1 + cnn[j]/real(J);
+     meanw2 = meanw2 + dnn[j]/real(J);
+   }
+
+  ev1 =  int2d(th)((dx(ann[0]))^2+(dy(ann[0]))^2+(dx(bnn[0]))^2+(dy(bnn[0]))^2);
+  ev2 =  int2d(th)((dx(ann[1]))^2+(dy(ann[1]))^2+(dx(bnn[1]))^2+(dy(bnn[1]))^2);
+  ev3 =  int2d(th)((dx(ann[2]))^2+(dy(ann[2]))^2+(dx(bnn[2]))^2+(dy(bnn[2]))^2);
+  ev4 =  int2d(th)((dx(ann[3]))^2+(dy(ann[3]))^2+(dx(bnn[3]))^2+(dy(bnn[3]))^2);
+  evm =  int2d(th)((dx(meanu1))^2+(dy(meanu1))^2+(dx(meanu2))^2+(dy(meanu2))^2);
+
+   data1 << t<<"     "<<ev1<<"    "<<ev2<<"     "<<ev3<<"     "<<ev4<<"     "<<evm<<endl;
+
+
+   for(int j=0;j<J;j++){
+
+      ep = ep1*coef(j)/5.0;
+
+      un1 = ann[j];
+      un2 = bnn[j];
+      wn1 = cnn[j];
+      wn2 = dnn[j];
+
+
+      BackwardEuler1;     
+      BackwardEuler2;
+
+       an[j] = u1;
+       bn[j] = u2;
+       cn[j] = w1;
+       dn[j] = w2;      
+    }
+
+
+
+        
+
+
+  
+    for (iter = 2; iter <= nbiter; iter++) {
+
+        t = dt*iter;
+
+        time = t;
+        
+        sumun1 = 0.0;
+        sumun2 = 0.0;
+        sumwn1 = 0.0;
+        sumwn2 = 0.0;
+
+        sumunn1 = 0.0;
+        sumunn2 = 0.0;
+        sumwnn1 = 0.0;
+        sumwnn2 = 0.0;
+
+      for (int j=0;j<J;j++){
+      
+         sumunn1 = sumunn1 + ann[j]/real(J);
+         sumunn2 = sumunn2 + bnn[j]/real(J);
+         sumwnn1 = sumwnn1 + cnn[j]/real(J);
+         sumwnn2 = sumwnn2 + dnn[j]/real(J);
+
+         sumun1 = sumun1 + an[j]/real(J);
+         sumun2 = sumun2 + bn[j]/real(J);
+         sumwn1 = sumwn1 + cn[j]/real(J);
+         sumwn2 = sumwn2 + dn[j]/real(J);
+      }
+
+
+
+      meanu1 = 0.0;
+      meanu2 = 0.0;
+      meanw1 = 0.0;
+      meanw2 = 0.0;
+
+      meanu1 = 2.0 * sumun1 - sumunn1;
+      meanu2 = 2.0 * sumun2 - sumunn2;
+      meanw1 = 2.0 * sumwn1 - sumwnn1;
+      meanw2 = 2.0 * sumwn2 - sumwnn2;
+
+      ev2 =  int2d(th)((dx(an[1]))^2+(dy(an[1]))^2+(dx(bn[1]))^2+(dy(bn[1]))^2);
+      ev3 =  int2d(th)((dx(an[2]))^2+(dy(an[2]))^2+(dx(bn[2]))^2+(dy(bn[2]))^2);
+      ev4 =  int2d(th)((dx(an[3]))^2+(dy(an[3]))^2+(dx(bn[3]))^2+(dy(bn[3]))^2);
+      ev1 =  int2d(th)((dx(an[0]))^2+(dy(an[0]))^2+(dx(bn[0]))^2+(dy(bn[0]))^2);
+      evm =  int2d(th)((dx(meanu1))^2+(dy(meanu1))^2+(dx(meanu2))^2+(dy(meanu2))^2);
+//      evm =  int2d(th)((dx(sumun1))^2+(dy(sumun1))^2+(dx(sumun2))^2+(dy(sumun2))^2);
+
+      data1 << t<<"     "<<ev1<<"    "<<ev2<<"     "<<ev3<<"     "<<ev4<<"     "<<evm<<endl;
+
+
+      H1Erroru = H1Erroru + int2d(th)((dx(meanu1)-utrue1x)^2+(dy(meanu1)-utrue1y)^2+(dx(meanu2)-utrue2x)^2+(dy(meanu2)-utrue2y)^2);
+      H1Errorw = H1Errorw + int2d(th)((dx(meanw1)-wtrue1x)^2+(dy(meanw1)-wtrue1y)^2+(dx(meanw2)-wtrue2x)^2+(dy(meanw2)-wtrue2y)^2);
+      
+      cout<< "***********************************************************************"<<endl;
+      cout<< "Timestep = " << iter <<" Time = "<<t<<"   H1Errorw="<<H1Errorw<< endl ;
+      cout<< "***********************************************************************"<<endl;
+
+              
+       for (int j = 0; j<J; j++){      
+
+           unn1 = ann[j];
+           unn2 = bnn[j];     
+           wnn1 = cnn[j];
+           wnn2 = dnn[j];
+      
+           un1 = an[j];
+           un2 = bn[j];
+           wn1 = cn[j];
+           wn2 = dn[j];
+
+           ep = ep1*coef(j)/5.0; 
+      
+           ElsasserStep1;
+           ElsasserStep2;
+      
+           ann[j] = an[j];
+           bnn[j] = bn[j];
+           cnn[j] = cn[j];
+           dnn[j] = dn[j];
+
+           an[j] = u1;
+           bn[j] = u2;
+           cn[j] = w1;
+           dn[j] = w2;
+      }      
+      
+      
+        
+    }
+    L2H1Erroru(k) = sqrt(dt*H1Erroru);
+    L2H1Errorw(k) = sqrt(dt*H1Errorw);
+    
+      cout<< "***********************************************************************"<<endl;
+      cout<< "    H1Erroru="<<L2H1Erroru(k)<<"   H1Errorw="<<L2H1Errorw(k)<< endl ;
+      cout<< "***********************************************************************"<<endl;
+
+}
+
+cout<<L2H1Erroru(0)<<"    "<<L2H1Errorw(0)<<endl;
+cout<<L2H1Erroru(1)<<"    "<<L2H1Errorw(1)<<endl;
+cout<<L2H1Erroru(2)<<"    "<<L2H1Errorw(2)<<endl;
+cout<<L2H1Erroru(3)<<"    "<<L2H1Errorw(3)<<endl;
+cout<<L2H1Erroru(4)<<"    "<<L2H1Errorw(4)<<endl;
+
+cout<<"Convergence rate for v"<<endl;
+for (int i = 0; i < 4; i++){
+  cout<<" convergence rate = "<<log(L2H1Erroru(i)/L2H1Erroru(i+1))/log(2.)<<endl;
+}
+cout<<"Convergence rate for w"<<endl;
+
+for (int i = 0; i < 4; i++){
+  cout<<" convergence rate = "<<log(L2H1Errorw(i)/L2H1Errorw(i+1))/log(2.)<<endl;
+}
+
+
+
+
+
+
+
+
+
