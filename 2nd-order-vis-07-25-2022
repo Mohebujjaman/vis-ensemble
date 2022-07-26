@@ -1,0 +1,801 @@
+\documentclass[final]{siamltex}
+
+\usepackage{epsfig,amssymb,latexsym}
+\usepackage{amsfonts,psfrag,amsmath,bbm,color}
+\usepackage{cancel}
+\usepackage{comment}
+\usepackage{mathrsfs}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{multirow}
+\usepackage{enumerate}
+\usepackage{cancel}
+\usepackage{algpseudocode}
+\usepackage{caption}  %use \captionof{figure / table}{caption1}
+\usepackage{subcaption}
+\usepackage{url}
+\usepackage{rotating}
+\usepackage{slashbox}
+\usepackage{bigints}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{ulem}
+
+%\usepackage{amsthm}
+%\newtheorem*{newlemma*}{\normalfont\textsl{Lemma}}[section]
+%\usepackage[makeroom]{cancel}
+%\usepackage{xcolor,sectsty}
+%\newtheorem{algorithm}{Algorithm}[section]
+%\usepackage{algorithm2e}
+%\usepackage{algorithm}
+%\usepackage{algorithmic}
+\usepackage{placeins}
+\newcommand{\rz}[1]{\stackrel{#1}{\phantom{.}}}
+\newcommand{\bHs}{\pmb{\mathbb{H}}}
+\newcommand{\bnh}{\hat{\textbf{\textit{n}}}}
+\newcommand{\bchi}{\pmb{\chi}}
+%\newcommand{\bq}{\pmb{q}}
+\newcommand{\bJ}{{\bf{J}}}
+\newcommand{\bE}{{\bf E}}
+\newcommand{\bs}{{\bf s}}
+\newcommand{\de}[1]{\textcolor{red}{\st{#1}}}
+\newcommand{\jaman}[1]{{\color{blue}#1}}
+%\newcommand{\bH}{\bf{H}}
+\def\grad{{\nabla}}
+%\newcommand{\bv}{\pmb{v}}
+%\newtheorem{algorithm}{Algorithm}[section]
+%\usepackage{algorithm}
+\usepackage[ruled,vlined]{algorithm2e}
+%\newtheorem{theorem}{Theorem}
+\usepackage{stackengine}
+\usepackage{geometry}
+ \geometry{
+ a4paper,
+ total={170mm,257mm},
+ left=26mm,
+ top=30mm,
+ right=26mm,
+ bottom=30mm
+ }
+
+\hfuzz=20pt
+\vfuzz=20pt
+\hbadness=10000
+\vbadness=\maxdimen
+  
+\newcommand{\bif}{\textbf{\textit{f}}}
+\newcommand{\bg}{\textbf{\textit{g}}}
+\newcommand{\bXs}{\pmb{\mathbb{X}}}
+\newcommand{\by}{\boldsymbol{y}}
+\newcommand{\footremember}[2]{%
+    \footnote{#2}
+    \newcounter{#1}
+    \setcounter{#1}{\value{footnote}}%
+}
+\newcommand{\footrecall}[1]{%
+    \footnotemark[\value{#1}]%
+} 
+
+%%%%%%%  The followings are for the flow diagram %%%%%%%%%%%%%
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows}
+%\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=1cm, minimum height=1cm,text centered, draw=black, fill=red!30]
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=1cm, minimum height=1cm,text centered, draw=black]
+\tikzstyle{io} = [trapezium, trapezium left angle=70, trapezium right angle=110, minimum width=1cm, minimum height=1cm, text centered, draw=black, fill=blue!30]
+%\tikzstyle{method} = [rectangle, rounded corners, minimum width=1cm, minimum height =1cm, text centered, draw=black, fill=green!30]
+\tikzstyle{method} = [rectangle, rounded corners, minimum width=1cm, minimum height =1cm, text centered, draw=black]
+%\tikzstyle{process} = [rectangle, minimum width=1cm, minimum height=1cm, text centered, draw=black, fill=orange!30]
+\tikzstyle{process} = [rectangle, minimum width=1cm, minimum height=1cm, text centered, draw=black]
+\tikzstyle{decision} = [diamond, minimum width=0.5cm, minimum height=0.5cm, text centered, draw=black, fill=green!30]
+\tikzstyle{arrow} = [thick,->,>=stealth]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\documentclass[12pt]{article}
+%\usepackage{amssymb, epsfig,amssymb, latexsym}
+%\usepackage{amsfonts,psfrag,amsmath,bbm,color,multirow,algorithm,url}
+%\usepackage{placeins}
+
+% commutative diagrams
+\usepackage{amscd}
+
+\graphicspath{{./figs/}}
+%\usepackage{amsthm}
+%\newtheorem{theorem}{Theorem}[section]
+\input{notation-siam}
+
+%\usepackage{fullpage}
+
+\synctex=1
+
+\begin{document}
+\title{A high order efficient grad-div stabilized algorithm for parameterized magnetohydrodynamic flow ensembles simulation}
+
+
+
+\author{
+M. Mohebujjaman\footremember{mit}{D\MakeLowercase{epartment of} M\MakeLowercase{athematics and} P\MakeLowercase{hysics}, T\MakeLowercase{exas} A\&M I\MakeLowercase{nternational} U\MakeLowercase{niversity} (TAMIU), TX 78041, USA; S\MakeLowercase{upported by} N\MakeLowercase{ational} S\MakeLowercase{cience}  F\MakeLowercase{oundation grant} DMS-2213274, \MakeLowercase{and} U\MakeLowercase{niversity} R\MakeLowercase{esearch grant,} TAMIU;}\footnote{C\MakeLowercase{orrespondence: m.mohebujjaman@tamiu.edu}}%
+\and J. Miranda\footrecall{mit} \footremember{clemson}{U\MakeLowercase{ndergraduate} S\MakeLowercase{tudent};}
+\and M. Kamrujjaman\footremember{DU}{D\MakeLowercase{epartment of} M\MakeLowercase{athematics}, U\MakeLowercase{niversity of} D\MakeLowercase{haka}, D\MakeLowercase{haka} 1000, B\MakeLowercase{angladesh};}
+ }
+
+
+%\date{\today}
+\maketitle
+
+\begin{abstract}
+ 
+\end{abstract}
+
+
+{\bf Key words.} magnetohydrodynamics, uncertainty quantification, fast ensemble calculation, finite element method, Els\"asser variables
+
+\medskip
+{\bf Mathematics Subject Classifications (2000)}: 65M12, 65M22, 65M60, 76W05 
+
+\pagestyle{myheadings}
+\thispagestyle{plain}
+
+
+\markboth{\MakeUppercase{A high order efficient  algorithm for parameterized MHD flow ensembles}}{\MakeUppercase{ M. Mohebujjaman, J. Miranda, M. Kamrujjaman}}
+
+\section{\large Introduction}
+In this work, we consider the following set of $J$ time-dependent, viscoresistive and incompressible dimensionless MHD equations \cite{B03, D01, LL60, MR17} for computing flow ensemble simulation of homogeneous Newtonian fluids:
+\begin{eqnarray}
+\bu_{j,t}+\bu_j\cdot\nabla \bu_j-s\bB_j\cdot\nabla \bB_j-\nu_j \Delta \bu_j+\nabla p_j &= & \bif_j(\bx,t), \hspace{2mm}\text{in}\hspace{2mm}\Omega \times (0,T], \label{gov1}\\
+\bB_{j,t}+\bu_j\cdot\nabla \bB_j-\bB_j\cdot\nabla \bu_j-\nu_{m,j}\Delta \bB_j+\nabla\lambda_j &= & \nabla\times \bg_j(\bx,t),\hspace{2mm}\text{in}\hspace{2mm}\Omega \times (0,T],\label{gov3}\\
+\nabla\cdot \bu_j & =& 0, \hspace{2mm}\text{in}\hspace{2mm}\Omega \times (0,T], \\
+\nabla\cdot \bB_j &=& 0, \hspace{2mm}\text{in}\hspace{2mm}\Omega \times (0,T],\\ 
+\bu_j(\bx,0)& =& \bu_j^0(\bx),\hspace{2mm}\text{in}\hspace{2mm}\Omega,\label{gov2}\\
+\bB_j(\bx,0)& =& \bB_j^0(\bx),\hspace{2mm}\text{in}\hspace{2mm}\Omega,\label{gov5}
+%u_j&=&B_j=0\hspace{2mm}\text{on}\hspace{2mm}\partial\Omega. \label{gov5}
+\end{eqnarray}
+where $\bu_j$, $\bB_j$, $p_j$, and $\lambda_j$ denote the velocity, magnetic field, pressure, and artificial magnetic pressure solutions, respectively, for each $j=1,2,\cdots\hspace{-0.35mm},J$, corresponding to distinct combination of kinematic viscosity $\nu_j$, magnetic diffusivity $\nu_{m,j}$, body force $\bif_j$, $\nabla\times\bg_j$, and initial conditions $\bu_j^0$, $\bB_j^0$. The symbol $\Omega$ denotes the simulation domain (which we assume to be convex), $t$ the time variable, $\bx$ the spatial variable and $T$ the simulation time. The coupling number $s$ is the coefficient of the Lorentz force into the momentum equation \eqref{gov1}. For simplicity of our analysis, we consider homogeneous Dirichlet boundary conditions.
+
+Input data, e.g., initial and boundary conditions, viscosities, and body forces have a significant effect on simulations of complex dynamical systems, but the involvement of uncertainty in their measurements reduces the accuracy of final solutions. For a robust and high fidelity solution, computation of ensemble average solution is popular in many applications such as surface data assimilation \cite{fujita2007surface}, magnetohydrodynamics \cite{jiang2018efficient}, porous media flow \cite{jiang2021artificial}, weather forecasting \cite{L05,LP08}, spectral methods \cite{LK10}, sensitivity analyses \cite{MX06}, and hydrology \cite{GG11}. Computing a quantity of interest by running a simulation subject to the ensemble average of a particular input data is not always the same as computing the ensemble average of the quantity of interest running the simulations for all different realizations of the input data first and then taking their average \cite{gunzburger2019efficient}.
+
+Computing long-time simulations of fully coupled MHD ensemble systems is computationally arduous and expensive. Therefore, decoupled algorithms which can reuse the global system matrix at each time-step for all $J$ realizations are computationally attractive. First-order time-stepping partitioned algorithms with small time-step restrictions are studied at low magnetic Reynolds number in a reduced MHD system in \cite{jiang2018efficient}. Decoupled, and unconditionally stable algorithm for the evolutionary full MHD ensemble system in Els\" asser variables are investigated in \cite{MR17}.
+
+Viscosity parameters are the most important and sensitive input data, as they determine the flow characteristics. For example, as the Reynolds number $Re:=UL/\nu$ grows, the laminar flow moves into a convective dominated regime and eventually becomes turbulent \cite{zhang2017critical}. The situation is more complex in MHD flow with high magnetic Reynolds number $Re_m:=UL/\nu_{m}$.  \textcolor{black}{Here}, the contribution of the nonlinearity \textcolor{black}{dominates the flow's development and evolution.} Thus, for an accurate simulation, it \textcolor{black}{is} important to \textcolor{black}{accurately account for their}  uncertainties. The above-mentioned MHD ensemble works \cite{jiang2018efficient, MR17} were done assuming uncertainties only on the initial and boundary conditions, and forcing functions; no uncertainties are considered on the viscosity coefficients. In this paper, we propose an algorithm for the MHD flow ensemble in which not only the initial and boundary data, and forcing functions, but also the kinematic viscosity and magnetic diffusivity parameters are different from one ensemble member to another.
+
+\textcolor{red}{The proposed algorithm is based on Els\"asser variables \cite{E50,erkmen2020second,li2018partitioned}}.
+Recent studies show \textcolor{black}{that}  instead of solving coupled MHD systems in \textcolor{black}{primitive} variables, using \textcolor{black}{instead} Els\"asser variables \textcolor{black}{can provide} a decoupled stable MHD simulation algorithm, \cite{AKMR15, HMR17, Mohebujjaman2021High, MR17,T14,wilson2015high}. Defining $\bv_j:=\bu_j+\sqrt{s} \bB_j$, $\bw_j:=\bu_j-\sqrt{s}\bB_j$, $\bif_{1,j}:=\bif_{j}+\sqrt{s}\nabla\times \bg_j$, $\bif_{2,j}:=\bif_j-\sqrt{s}\nabla\times \bg_j$, $q_j:=p_j+\sqrt{s}\lambda_j$ and $r_j:=p_j-\sqrt{s}\lambda_j$ produces the Els{\"{a}}sser variable formulation of the ensemble systems:
+\begin{eqnarray}
+\bv_{j,t}+\bw_j\cdot\nabla \bv_j-\frac{\nu_j+\nu_{m,j}}{2}\Delta \bv_j-\frac{\nu_j-\nu_{m,j}}{2}\Delta \bw_j+\nabla q_j=\bif_{1,j},\label{els1}\\
+\bw_{j,t}+\bv_j\cdot\nabla \bw_j-\frac{\nu_j+\nu_{m,j}}{2}\Delta \bw_j-\frac{\nu_j-\nu_{m,j}}{2}\Delta \bv_j+\nabla r_j=\bif_{2,j},\label{els2}\\
+\nabla\cdot \bv_j=\nabla\cdot \bw_j=0,\label{els3}
+\end{eqnarray}
+together with the initial and boundary conditions.
+
+To reduce the immense computational cost for the above ensemble \textcolor{red}{Els{\"{a}}sser variables} system \textcolor{red}{\eqref{els1}-\eqref{els3}}, we propose a decoupled scheme \textcolor{red}{following the breakthrough idea from} \cite{JL14}. \textcolor{red}{The decoupled feature enables the algorithm to solve two identical Oseen-type \cite{zheng2021two} sub-problems \textit{simultaneously} at each time-step. Moreover, following the breakthrough idea \cite{JL14}, the two identical sub-problems are posed in such a way that, at each time-step the finite element assembly of the system provides the same coefficient matrix (which is independent of $j$) for each of the $J$ realizations. Hence, to solve for the next time-step, one solves the following system of equations of the form $A[\bx_1|\bx_2|\cdots|\bx_J]=[\bb_1|\bb_2|\cdots|\bb_J]$. Therefore, a massive amount of computer memory is saved, and system matrix assembly and factorization/preconditioner are needed only once per time-step. Moreover, the algorithm can take advantage of block linear solvers \cite{ju2020numerical}. This idea in \cite{JL14} has been implemented for the solution of the heat equation with uncertain temperature-dependent conductivity \cite{Unconditionally2021Fiordilino}, Navier-Stokes simulations \cite{J15,jiang2017second,JL15,NTW16}, magnetohydrodynamics \cite{jiang2018efficient,MR17}, parameterized flow problems \cite{Gunzburger2019Second-Order, GJW17}, and turbulence modeling \cite{JKL15}.}
+
+\textcolor{red}{The proposed efficient ensemble scheme is proven to be stable and convergent without any time-step restriction, \textcolor{black}{and handles} uncertainties in all input data. To the best of our knowledge, this scheme is novel for the uncertainty quantification of MHD flow ensembles.}  
+
+The \textcolor{black}{rest of the} paper is organized as follows: To follow a smooth analysis, we provide necessary notations and mathematical preliminaries in Section \ref{notation-prelims}. In Section \textcolor{red}{\ref{implicit-explicit-scheme}, we present the proposed implicit-explicit efficient ensemble scheme, define the ensemble averages, and finally provide a corresponding fully discrete and decoupled algorithm. We analyze the discrete algorithm, state, and prove its stability and well-posedness in Section \ref{stability-analysis}. To provide an error estimate, we state and prove the convergence theorem in Section \ref{convergence-theorem}}. To support the theoretical analysis, we compute the convergence rates, \textcolor{black}{check the} energy \textcolor{black}{stability} of the scheme, and test the scheme on benchmark problems in Section \ref{numerical-experiments}. Finally, conclusions and future research avenues are given in Section \ref{conclusion-future-works}.
+
+
+
+ 
+
+
+
+\section{\large Notation and preliminaries}\label{notation-prelims}
+
+Let $\Omega\subset \mathbb{R}^d\ (d=2,3)$ be a convex polygonal or polyhedral domain with boundary $\partial\Omega$. The usual $L^2(\Omega)$ norm and inner product are denoted by $\|.\|$ and $(.,.)$, respectively. Similarly, the $L^p(\Omega)$ norms and the Sobolev $W_p^k(\Omega)$ norms are $\|.\|_{L^p}$ and $\|.\|_{W_p^k}$, respectively for $k\in\mathbb{N},\hspace{1mm}1\le p\le \infty$. The Sobolev space $W_2^k(\Omega)$ is represented by $H^k(\Omega)$ with norm $\|.\|_k$. The vector-valued spaces are $$\bL^p(\Omega)=(L^p(\Omega))^d, \hspace{1mm}\text{and}\hspace{1mm}\bH^k(\Omega)=(H^k(\Omega))^d.$$
+For $\bX$ being a normed function space in $\Omega$, $L^p(0,T;\bX)$ is the space of all functions defined on $(0,T]\times\Omega$ for which the following norm
+\begin{align*}
+    \|\bu\|_{L^p(0,T;\bX)}=\lp\int_0^T\|\bu\|_{\bX}^pdt\rp^\frac{1}{p},\hspace{2mm}p\in[1,\infty)
+\end{align*}
+is finite. For $p=\infty$, the usual modification is used in the definition of this space. The natural function spaces for our problem are
+\begin{align*}
+    \bX:&=\bH_0^1(\Omega)=\{\bv\in \bL^p(\Omega) :\nabla \bv\in L^2(\Omega)^{d\times d}, \bv=\textbf{0} \hspace{2mm} \mbox{on}\hspace{2mm}   \partial \Omega\},\\
+    Q:&=L_0^2(\Omega)=\{ q\in L^2(\Omega): \int_\Omega q\hspace{1mm}d\bx=0\}.
+\end{align*}
+Recall the Poincar\'e inequality holds in $\bX$: There exists $C$ depending only on $\Omega$ satisfying for all $\bphi\in \bX$,
+\[
+\| \bphi \| \le C \| \nabla \bphi \|.
+\]
+The divergence-free velocity space is given by
+$$\bV:=\{\bv\in \bX:(\nabla\cdot \bv, q)=0, \forall q\in Q\}.$$
+We define the explicitly skew symmetrized trilinear form $b^*:\bX\times \bX\times \bX\rightarrow \mathbb{R}$ by
+ \[
+ b^*(\bu,\bv,\bw):=\frac12\big((\bu\cdot\nabla \bv,\bw)-(\bu\cdot\nabla \bw,\bv)\big).
+ \]
+ Note that $b^*(\bu,\bv,\bv)=0$, and if $\|\nabla\cdot\bu\|=0$, then $(\bu\cdot\nabla\bv,\bw)=b^*(\bu,\bv,\bw)$. Moreover, $b^*(\bu,\bv,\bw)$ satisfies the following bound \cite{GR86}:  
+\begin{align}
+|b^*(\bu,\bv,\bw)|\leq C(\Omega)\|\nabla \bu\|\|\nabla \bv\|\|\nabla \bw\|,\hspace{2mm}\mbox{for any}\hspace{2mm}\bu,\bv,\bw\in \bX.\label{nonlinearbound}
+\end{align}
+
+The conforming finite element spaces are denoted by $\bX_h\subset \bX$ and  $Q_h\subset Q$, and we assume a regular triangulation $\tau_h(\Omega)$, where $h$ is the maximum triangle diameter.   We assume that $(\bX_h,Q_h)$ satisfies the usual discrete \textit{inf-sup} condition
+\begin{align}
+\inf_{q_h\in Q_h}\sup_{\bv_h\in \bX_h}\frac{(q_h,\grad\cdot \bv_h)}{\|q_h\|\|\grad \bv_h\|}\geq\beta>0,\label{infsup}
+\end{align}
+where $\beta$ is independent of $h$. The space of discretely divergence-free functions is defined as 
+\begin{align*}
+    \bV_h:=\{\bv_h\in \bX_h:(\nabla\cdot \bv_h,q_h)=0,\hspace{2mm}\forall q_h\in Q_h\}.
+\end{align*}
+For simplicity of our analysis, we will use \textcolor{black}{the} Scott-Vogelius (SV) finite element pair $(\bX_h, Q_h)=\lp(P_k)^d, P_{k-1}^{disc}\rp$,  which satisfies the \textit{inf-sup} condition \textcolor{black}{under certain conditions, such as} when the mesh is created as a barycenter refinement of a regular mesh and the polynomial degree $k\ge d$  \cite{arnold1992quadratic,Z05}. Our analysis can be extended without difficulty to any \textit{inf-sup} stable element choice, although with minor additional technical detail. \textcolor{red}{Since the SV element is point-wise divergence free, the discrete pressure terms vanish from the analysis. But if we use a finite element pair which is only weakly divergence free, for example, the Taylor-Hood element, then we must need to handle the pressure involving terms in the analysis. Since, in this case, the orthogonal property of the discrete pressure and velocity spaces may not hold true.}
+
+
+
+We have the following approximation properties in $(\bX_h,Q_h)$: \cite{BS08}
+\begin{align}
+\inf_{\bv_h\in \bX_h}\|\bu-\bv_h\|&\leq Ch^{k+1}|\bu|_{k+1},\hspace{2mm}\bu\in \bH^{k+1}(\Omega),\label{AppPro1}\\
+ \inf_{\bv_h\in \bX_h}\|\grad (\bu-\bv_h)\|&\leq Ch^{k}|\bu|_{k+1},\hspace{5mm}\bu\in \bH^{k+1}(\Omega),\label{AppPro2}\\
+\inf_{q_h\in Q_h}\|p-q_h\|&\leq Ch^k|p|_k,\hspace{10mm}p\in H^k(\Omega),
+\end{align}
+where $|\cdot|_r$ denotes the $H^r$ or $\bH^r$ seminorm.
+
+We will assume the mesh is sufficiently regular for the inverse inequality to hold, and with this and the \textcolor{red}{\textit{inf-sup}} assumption, we have approximation properties
+\begin{align}
+\| \nabla (\bu- P^{L^2}_{\bV_h}(\bu)  ) \|&\leq Ch^{k}|\bu|_{k+1},\hspace{2mm}\bu\in \bH^{k+1}(\Omega),\label{AppPro3}\\
+ \inf_{\bv_h\in \bV_h}\|\grad (\bu-\bv_h)\|&\leq Ch^{k}|\bu|_{k+1},\hspace{2mm}\bu\in \bH^{k+1}(\Omega),\label{AppPro4}
+\end{align}
+where $P^{L^2}_{\bV_h}(\bu)$ is the $L^2$ projection of $\bu$ into $\bV_h$.
+
+\textcolor{black}{The following lemma for the discrete Gr\"onwall inequality was given in \cite{HR90}.
+\begin{lemma}\label{dgl}
+Let $\Delta t$, $\cD$, $a_n$, $b_n$, $c_n$, $d_n$ be non-negative numbers for $n=1,\cdots\hspace{-0.35mm},M$ such that
+    $$a_M+\Delta t \sum_{n=1}^Mb_n\leq \Delta t\sum_{n=1}^{M-1}{d_na_n}+\Delta t\sum_{n=1}^Mc_n+\cD\hspace{3mm}\mbox{for}\hspace{2mm}M\in\mathbb{N},$$
+then for all $\Delta t> 0,$
+$$a_M+\Delta t\sum_{n=1}^Mb_n\leq \mbox{exp}\left(\Delta t\sum_{n=1}^{M-1}d_n\right)\lp\Delta t\sum_{n=1}^Mc_n+\cD\rp\hspace{2mm}\mbox{for}\hspace{2mm}M\in\mathbb{N}.$$
+\end{lemma}}
+
+\textcolor{red}{\section{\large The implicit-explicit ensemble scheme}\label{implicit-explicit-scheme}
+We suppress the spatial discretization momentarily to keep the focus on the main idea. We consider a uniform time-step size $\Delta t$ and let $t^n=n\Delta t$ for $n=0, 1, \cdots$, then computing the $J$ solutions independently, takes the following form:\\ 
+Step 1: For $j=1,\cdots\hspace{-0.35mm},J$, 
+\begin{align}
+\frac{3\bv_j^{n+1}}{2\Delta t}&+<\bw>^n\cdot\nabla \bv_j^{n+1}-\frac{\Bar{\nu}+\Bar{\nu}_{m}}{2}\Delta \bv_j^{n+1} +\gamma\grad(\grad\cdot\bv_j^{n+1}) +\nabla q_j^{n+1} = \bif_{1,j}(t^{n+1})\nonumber\\&+\frac{4\bv_j^n-\bv_j^{n-1}}{2\Delta t}-\bw_j^{'n}\cdot\nabla (2 \bv_j^n-\bv_j^{n-1})+\frac{\nu_j^{'}+\nu_{m,j}^{'}}{2}\Delta(2 \bv_j^{n}-\bv_j^{n-1})\nonumber\\&+(1-\theta)\frac{\nu_j-\nu_{m,j}}{2}\Delta \bw_j^n+\theta\frac{\nu_j-\nu_{m,j}}{2}\Delta (2 \bw_j^n-\bw_j^{n-1}),\label{scheme1}\\\nabla\cdot \bv_j^{n+1}&=0.\label{incom1}
+\end{align}
+Step 2: For $j=1,\cdots\hspace{-0.35mm},J$,
+\begin{align}
+\frac{3\bw_j^{n+1}}{2\Delta t}&+<\bv>^n\cdot\nabla \bw_j^{n+1}-\frac{\Bar{\nu}+\Bar{\nu}_{m}}{2}\Delta \bw_j^{n+1}+\gamma\grad(\grad\cdot\bw_j^{n+1})  +\nabla r_j^{n+1} = \bif_{2,j}(t^{n+1})\nonumber\\&+\frac{4\bw_j^n-\bw_j^{n-1}}{2\Delta t}-\bv_j^{'n}\cdot\nabla (2 \bw_j^n-\bw_j^{n-1})+\frac{\nu_j^{'}+\nu_{m,j}^{'}}{2}\Delta(2 \bw_j^{n}-\bw_j^{n-1})\nonumber\\&+(1-\theta)\frac{\nu_j-\nu_{m,j}}{2}\Delta \bv_j^n+\theta\frac{\nu_j-\nu_{m,j}}{2}\Delta (2 \bv_j^n-\bv_j^{n-1}),\label{scheme2}\\\nabla\cdot \bw_j^{n+1}&=0.\label{incom2}
+\end{align}
+Here, $\bv_j^n,\bw_j^{n}, q_j^n$, and $r_j^{n}$ denote approximations of $\bv_j(\cdot,t^n),\bw_j(\cdot,t^n), q_j(\cdot,t^n)$, and $r_j(\cdot,t^n)$, respectively. The ensemble average and fluctuation about the ensemble average are defined as follows:
+\begin{equation}\label{ensemble_def}
+\left.\begin{aligned}
+<\bz>^n:&=\frac{1}{J}\sum\limits_{j=1}^{J}(2\bz_j^n-\bz_j^{n-1}), \hspace{2mm} \bz_j^{'n}:=2\bz_j^n-\bz_j^{n-1}-<\bz>^n,\\
+\Bar{\nu}:&=\frac{1}{J}\sum\limits_{j=1}^{J}\nu_j,\hspace{4mm}\nu_j^{'}:=\nu_j-\Bar{\nu},\\
+\Bar{\nu}_m:&=\frac{1}{J}\sum\limits_{j=1}^{J}\nu_{m,j},\hspace{2mm}\nu_{m,j}^{'}:=\nu_{m,j}-\Bar{\nu}_m.   
+\end{aligned}\right\}
+\end{equation}}
+
+\textcolor{red}{We observe, at time $t=t^{n+1}$, the sub-problem \eqref{scheme1}-\eqref{incom1} has unknowns $\bv_j^{n+1}$, and $q_j^{n+1}$ and on the other hand, the sub-problem \eqref{scheme2}-\eqref{incom2} has unknowns $\bw_j^{n+1}$, and $r_j^{n+1}$. Thus, the two sub-problems are decoupled and can be solved simultaneously. Moreover, the coefficient of each unknown in the two sub-problems does not depend on $j$, which allows having the same system matrix for all of the $j$ realizations at each time-step after the finite element assembly. Consequently, we only need to solve a single linear system with $J$ different right-hand-side vectors at each time-step. Therefore, in contrast to solving $J$ different simulations independently, we only need a single LU decomposition or its variant if a direct solver is possible to use and a single preconditioner is needed to build if a block-iterative solver is used. This allows us to reduce a massive computational complexity for simulating convective-dominated MHD ensemble flow problems with low variability.}
+
+
+
+\subsection{ Fully discrete scheme}\label{fully-discrete-scheme}
+
+Using a finite element spatial discretization, we investigate the \textcolor{black}{proposed} decoupled ensemble scheme \textcolor{black}{\eqref{scheme1}-\eqref{incom2}} in a fully discrete setting. \textcolor{blue}{Following the definitions in \eqref{ensemble_def}, we define the discrete ensemble average solutions as
+\begin{align*}
+    <\hspace{-1mm}\bv_h\hspace{-1mm}>^n:&=\frac{1}{J}\sum_{j=1}^J(2\bv_{j,h}^n-\bv_{j,h}^{n-1}),\hspace{2mm}<\hspace{-1mm}\bw_h\hspace{-1mm}>^n:=\frac{1}{J}\sum_{j=1}^J(2\bw_{j,h}^n-\bw_{j,h}^{n-1}).
+\end{align*}}
+The \textcolor{red}{fully discrete, and decoupled time-stepping scheme for computing MHD flow ensembles} is defined below.
+
+ \begin{algorithm}[H]\label{Algn1}
+  \caption{Fully discrete and decoupled ensemble scheme} Given time-step $\Delta t>0$, end time $T>0$, grad-div parameter $\gamma>0$, initial conditions $\bv_j^0, \bw_j^0,\bv_j^1, \bw_j^1\in \bH^2\cup\bV$ and $\bif_{1,j}, \bif_{2,j}\in$ $ L^\infty\left( 0,T;\bH^{-1}(\Omega)\right)$ for $j=1,2,\cdots\hspace{-0.35mm},J$. Set $M=T/\Delta t$ and for $n=1,\cdots\hspace{-0.35mm},M-1$, compute:
+ Find $\bv_{j,h}^{n+1}\in \bV_h$ satisfying, for all $\bchi_{j,h}\in \bV_h$:
+ \begin{align}
+\Bigg(& \frac{3\bv_{j,h}^{n+1}-4\bv_{j,h}^n+\bv_{j,h}^{n-1}}{2\Delta t}, \bchi_{j,h}\Bigg)+b^*\left(<\bw_h>^n, \bv_{j,h}^{n+1},\bchi_{j,h}\right)+b^*\left(\bw_{j,h}^{'n}, 2\bv_{j,h}^n-\bv_{j,h}^{n-1},\bchi_{j,h}\right)\nonumber\\&+\frac{\Bar{\nu}+\Bar{\nu}_{m}}{2}\left(\nabla \bv_{j,h}^{n+1},\nabla \bchi_{j,h}\right)+\frac{\nu_j^{'}+\nu_{m,j}^{'}}{2}\left(\nabla (2\bv_{j,h}^{n}-\bv_{j,h}^{n-1}),\nabla\bchi_{j,h}\right)\nonumber\\&+(1-\theta)\frac{\nu_j-\nu_{m,j}}{2}\left(\nabla \bw_{j,h}^n,\nabla \bchi_{j,h}\right)+\theta\frac{\nu_j-\nu_{m,j}}{2}\left(\nabla(2 \bw_{j,h}^n-\bw_{j,h}^{n-1}),\nabla \bchi_{j,h}\right)\nonumber\\&\blue{+\gamma\big(\grad\cdot\bv_{j,h}^{n+1},\grad\cdot\bchi_{j,h}\big)}= \left(\bif_{1,j}(t^{n+1}),\bchi_{j,h}\right).\label{weaknew1}
+\end{align}
+Find $\bw_{j,h}^{n+1}\in \bV_h$ satisfying, for all $\bl_{j,h}\in \bV_h$:
+
+\begin{align}
+\Bigg(& \frac{3\bw_{j,h}^{n+1}-4\bw_{j,h}^n+\bw_{j,h}^{n-1}}{2\Delta t}, \bl_{j,h}\Bigg)+b^*\left(<\bv_h>^n, \bw_{j,h}^{n+1},\bl_{j,h}\right)+b^*\left(\bv_{j,h}^{'n}, 2\bw_{j,h}^n-\bw_{j,h}^{n-1},\bl_{j,h}\right)\nonumber\\&+\frac{\Bar{\nu}+\Bar{\nu}_{m}}{2}\left(\nabla \bw_{j,h}^{n+1},\nabla \bl_{j,h}\right)+\frac{\nu_j^{'}+\nu_{m,j}^{'}}{2}\left(\nabla (2\bw_{j,h}^{n}-\bw_{j,h}^{n-1}),\nabla\bl_{j,h}\right)\nonumber\\&+(1-\theta)\frac{\nu_j-\nu_{m,j}}{2}\left(\nabla \bv_{j,h}^n,\nabla \bl_{j,h}\right)+\theta\frac{\nu_j-\nu_{m,j}}{2}\left(\nabla(2 \bv_{j,h}^n-\bv_{j,h}^{n-1}),\nabla \bl_{j,h}\right)\nonumber\\&\blue{+\gamma\big(\grad\cdot\bw_{j,h}^{n+1},\grad\cdot\bl_{j,h}\big)}= \left(\bif_{2,j}(t^{n+1}),\bl_{j,h}\right).\label{weaknew2}
+\end{align}
+\end{algorithm}
+
+
+\section{\large Stability analysis and well-posedness}\label{stability-analysis}
+We now prove stability and well-posedness for the Algorithm \ref{Algn1}. To simplify \textcolor{black}{the} notation, denote $\alpha_j:=\Bar{\nu}+\Bar{\nu}_{m}-|\nu_j-\nu_{m,j}|(1+2\theta)-3|\nu_j^{'}+\nu_{m,j}^{'}|>0$, \textcolor{black}{for $j=1,2,\cdots\hspace{-0.35mm}, J$}, which will allow us to choose the biggest possible $\theta$ on
+\begin{align*}
+    \frac{\theta}{1+\theta}<\frac{\bar{\nu}}{\bar{\nu}_m}<\frac{1+\theta}{\theta}.
+\end{align*}
+
+\begin{theorem} Suppose $\textbf{f}_{1,j},\textbf{f}_{2,j}\in L^\infty\left(0,T;\bH^{-1}(\Omega)^d\right)$, and $\bv_{j,h}^0$, $\bw_{j,h}^0 \in \bH^1(\Omega)d$, then the solutions to the Algorithm \ref{Algn1} are stable: For $\Delta t\le\frac{\alpha_{min}h^2}{C\max\limits_{1\le j\le J}\Big\{\|\nabla\bv_{j,h}^{'n}\|^2, \|\nabla\bw_{j,h}^{'n}\|^2\Big\}}$, if $\alpha_j>0$
+\begin{align}
+    &\|\bv_{j,h}^M\|^2+\|2\bv_{j,h}^M-\bv_{j,h}^{M-1}\|^2+\|\bw_{j,h}^M\|^2+\|2\bw_{j,h}^M-\bw_{j,h}^{M-1}\|^2\nonumber\\&+\alpha_j\Delta t \sum_{n=2}^M\Big(\|\nabla\bv_{j,h}^n\|^2+\|\nabla\bw_{j,h}^n\|^2\Big)\blue{+4\gamma\Delta t\sum_{n=2}^{M}\Big(\|\nabla\cdot\bv_{j,h}^{n}\|^2+\|\nabla\cdot\bw_{j,h}^{n}\|^2\Big)}\nonumber\\
+    &\leq\|\bv_{j,h}^0\|^2+\|\bw_{j,h}^0\|^2+\|2\bv_{j,h}^1-\bv_{j,h}^0\|^2+\|2\bw_{j,h}^1-\bw_{j,h}^0\|^2\nonumber\\
+    &+(\bar{\nu}+\bar{\nu}_m)\Delta t\Big(\|\nabla\bv_{j,h}^1\|^2+\|\nabla\bw_{j,h}^1\|^2+\|\nabla\bv_{j,h}^0\|^2+\|\nabla\bw_{j,h}^0\|^2\Big)\nonumber\\
+    &+\frac{8\Delta t}{\alpha_j}\sum_{n=1}^{M-1}\Big(\|\bif_{1,j}(t^{n+1})\|_{-1}^2+\|\bif_{2,j}(t^{n+1})\|_{-1}^2\Big).
+\end{align}
+
+\end{theorem}
+
+
+
+\begin{proof} \textcolor{red}{The proof can be considered as 3 steps: In order to get the solution norms, we choose the test functions in the first step, in the second step we find the upper bounds of the terms on the right-hand-side, and then finally we combine the estimates, reduces terms and completes the proof as follows:}\\\\\textcolor{red}{\bf Step 1: Choose test functions to get solution norms.} Choose $\bchi_{j,h}=\bv_{j,h}^{n+1}$ in \eqref{weaknew1}, and $\bl_{j,h}=\bw_{j,h}^{n+1}$ in \eqref{weaknew2}, respectively \textcolor{black}{to obtain}
+
+\begin{align}
+\Bigg(&\frac{3\bv_{j,h}^{n+1}-4\bv_{j,h}^n+\bv_{j,h}^{n-1}}{2\Delta t},\bv_{j,h}^{n+1}\Bigg)+b^*\left(\bw_{j,h}^{'n}, 2\bv_{j,h}^n-\bv_{j,h}^{n-1},\bv_{j,h}^{n+1}\right)+\frac{\Bar{\nu}+\Bar{\nu}_{m}}{2}\|\nabla \bv_{j,h}^{n+1}\|^2\nonumber\\&\blue{+\gamma\|\nabla\cdot\bv_{j,h}^{n+1}\|^2}= \Big(\bif_{1,j}(t^{n+1}),\bv_{j,h}^{n+1}\Big)-\frac{\nu_j^{'}+\nu_{m,j}^{'}}{2}\left(\nabla(2 \bv_{j,h}^{n}-\bv_{j,h}^{n-1}),\nabla \bv_{j,h}^{n+1}\right)\nonumber\\&-(1-\theta)\frac{\nu_j-\nu_{m,j}}{2}\left(\nabla \bw_{j,h}^n,\nabla \bv_{j,h}^{n+1}\right)-\theta\frac{\nu_j-\nu_{m,j}}{2}\left(\nabla(2 \bw_{j,h}^n-\bw_{j,h}^{n-1}),\nabla \bv_{j,h}^{n+1}\right),\label{weakn1}
+\end{align}
+and
+\begin{align}
+\Bigg(&\frac{3\bw_{j,h}^{n+1}-4\bw_{j,h}^n+\bw_{j,h}^{n-1}}{2\Delta t},\bw_{j,h}^{n+1}\Bigg)+b^*\left(\bv_{j,h}^{'n}, 2\bw_{j,h}^n-\bw_{j,h}^{n-1},\bw_{j,h}^{n+1}\right)+\frac{\Bar{\nu}+\Bar{\nu}_{m}}{2}\|\nabla \bw_{j,h}^{n+1}\|^2\nonumber\\&\blue{+\gamma\|\nabla\cdot\bw_{j,h}^{n+1}\|^2}= \Big(\bif_{2,j}(t^{n+1}),\bw_{j,h}^{n+1}\Big)-\frac{\nu_j^{'}+\nu_{m,j}^{'}}{2}\left(\nabla(2 \bw_{j,h}^{n}-\bw_{j,h}^{n-1}),\nabla \bw_{j,h}^{n+1}\right)\nonumber\\&-(1-\theta)\frac{\nu_j-\nu_{m,j}}{2}\left(\nabla \bv_{j,h}^n,\nabla \bw_{j,h}^{n+1}\right)-\theta\frac{\nu_j-\nu_{m,j}}{2}\left(\nabla(2 \bv_{j,h}^n-\bv_{j,h}^{n-1}),\nabla \bw_{j,h}^{n+1}\right).\label{weakn2}
+\end{align}
+Using the following identity
+\begin{eqnarray}
+(3a-4b+c,a)=\frac{a^2+(2a-b)^2}{2}-\frac{b^2+(2b-c)^2}{2}+\frac{(a-2b+c)^2}{2},\label{ident}
+\end{eqnarray}
+we write
+\begin{align}
+\frac{1}{4\Delta t}\bigg(\|\bv_{j,h}^{n+1}\|^2-&\|\bv_{j,h}^n\|^2+\|2\bv_{j,h}^{n+1}-\bv_{j,h}^n\|^2-\|2\bv_{j,h}^n-\bv_{j,h}^{n-1}\|^2+\|\bv_{j,h}^{n+1}-2\bv_{j,h}^n+\bv_{j,h}^{n-1}\|^2\bigg)\nonumber\\&+b^*\left(\bw_{j,h}^{'n}, 2\bv_{j,h}^n-\bv_{j,h}^{n-1},\bv_{j,h}^{n+1}\right)+\frac{\Bar{\nu}+\Bar{\nu}_m}{2}\|\nabla \bv_{j,h}^{n+1}\|^2\nonumber\blue{+\gamma\|\nabla\cdot\bv_{j,h}^{n+1}\|^2}\\&=(\bif_{1,j}(t^{n+1}),v_{j,h}^{n+1})-\frac{\nu_j-\nu_{m,j}}{2}\big((1+\theta)\nabla \bw_{j,h}^n-\theta\nabla \bw_{j,h}^{n-1},\nabla \bv_{j,h}^{n+1}\big)\nonumber\\
+&-\frac{\nu^{'}_{j}+\nu^{'}_{m,j}}{2}\left(\nabla(2\bv^{n}_{j,h}-\bv^{n-1}_{j,h}),\nabla\bv^{n+1}_{j,h}\right),\label{MHW1}
+\end{align}
+and
+\begin{align}
+\frac{1}{4\Delta t}\bigg(\|\bw_{j,h}^{n+1}\|^2-&\|\bw_{j,h}^n\|^2+\|2\bw_{j,h}^{n+1}-\bw_{j,h}^n\|^2-\|2\bw_{j,h}^n-\bw_{j,h}^{n-1}\|^2+\|\bw_{j,h}^{n+1}-2\bw_{j,h}^n+\bw_{j,h}^{n-1}\|^2\bigg)\nonumber\\&+b^*\left(\bv_{j,h}^{'n}, 2\bw_{j,h}^n-\bw_{j,h}^{n-1},\bw_{j,h}^{n+1}\right)+\frac{\Bar{\nu}+\Bar{\nu}_m}{2}\|\nabla \bw_{j,h}^{n+1}\|^2\nonumber\blue{+\gamma\|\nabla\cdot\bw_{j,h}^{n+1}\|^2}\\&=(\bif_{2,j}(t^{n+1}),w_{j,h}^{n+1})-\frac{\nu_j-\nu_{m,j}}{2}\big((1+\theta)\nabla \bv_{j,h}^n-\theta\nabla \bv_{j,h}^{n-1},\nabla \bw_{j,h}^{n+1}\big)\nonumber\\
+&-\frac{\nu_j^{'}+\nu_{m,j}^{'}}{2}\left(\nabla(2 \bw_{j,h}^{n}-\bw_{j,h}^{n-1}),\nabla \bw_{j,h}^{n+1}\right).\label{MHW2}
+\end{align}
+Next, following the property \blue{$b^*(\bu,\bv,\bw)=-b^*(\bu,\bw,\bv)$}, using the bound in \eqref{nonlinearbound} and discrete inverse inequality, we have
+\begin{align}
+b^*\Big(\bw_{j,h}^{'n},2&\bv_{j,h}^{n}-\bv_{j,h}^{n-1},\bv_{j,h}^{n+1}\Big)=b^*\left(\bw_{j,h}^{'n},\bv_{j,h}^{n+1},\bv_{j,h}^{n+1}-2\bv_{j,h}^{n}+\bv_{j,h}^{n-1}\right)\nonumber\\
+&\leq C\|\nabla\bw_{j,h}^{'n}\|\|\nabla\bv_{j,h}^{n+1}\|\|\nabla\left(\bv_{j,h}^{n+1}-2\bv_{j,h}^{n}+\bv_{j,h}^{n-1}\right)\|\nonumber\\
+&\leq\frac{C}{h}\|\nabla\bw_{j,h}^{'n}\|\|\nabla\bv_{j,h}^{n+1}\|\|\bv_{j,h}^{n+1}-2\bv_{j,h}^{n}+\bv_{j,h}^{n-1}\|.\label{MHW3}
+\end{align}
+Using the above bound, adding equations \eqref{MHW1} and \eqref{MHW2}, applying the Cauchy-Schwarz and Young's inequalities to the $\nu_{j}-\nu_{m,j}$, and $\nu_j^{'}+\nu_{m,j}^{'}$ terms, and rearranging, yields
+\begin{align}
+    \frac{1}{4\Delta t}\bigg(\|\bv_{j,h}^{n+1}\|^2-\|\bv_{j,h}^n\|^2+\|2\bv_{j,h}^{n+1}-\bv_{j,h}^n\|^2-\|2\bv_{j,h}^n-\bv_{j,h}^{n-1}\|^2+\|\bv_{j,h}^{n+1}-2\bv_{j,h}^n+\bv_{j,h}^{n-1}\|^2\nonumber\\
+    +\|\bw_{j,h}^{n+1}\|^2-\|\bw_{j,h}^n\|^2+\|2\bw_{j,h}^{n+1}-\bw_{j,h}^n\|^2-\|2\bw_{j,h}^n-\bw_{j,h}^{n-1}\|^2+\|\bw_{j,h}^{n+1}-2\bw_{j,h}^n+\bw_{j,h}^{n-1}\|^2\bigg)\nonumber\\
+    +\frac{\bar{\nu}+\bar{\nu}_m}{2}\left(\|\nabla\bv_{j,h}^{n+1}\|^2+\|\nabla\bw_{j,h}^{n+1}\|^2\right)\blue{+\gamma\left(\|\nabla\cdot\bv_{j,h}^{n+1}\|^2+\|\nabla\cdot\bw_{j,h}^{n+1}\|^2\right)}\nonumber\\\leq\frac{\left|\nu_j-\nu_{m,j}\right|(1+2\theta)+3|\nu_j^{'}+\nu_{m,j}^{'}|}{4}\left(\|\nabla\bv_{j,h}^{n+1}\|^2+\|\nabla\bw_{j,h}^{n+1}\|^2\right)\nonumber\\
+    +\frac{\left|\nu_j-\nu_{m,j}\right|(1+\theta)+2|\nu^{'}_{j}+\nu^{'}_{m,j}|}{4}\left(\|\nabla\bv_{j,h}^n\|^2+\|\nabla\bw_{j,h}^n\|^2\right)\nonumber\\+\frac{\left|\nu_j-\nu_{m,j}\right|\theta+|\nu^{'}_{j}+\nu^{'}_{m,j}|}{4}\left(\|\nabla\bv_{j,h}^{n-1}\|^2+\|\nabla\bw_{j,h}^{n-1}\|^2\right)\nonumber\\
+    +\frac{C}{h}\|\nabla\bw_{j,h}^{'n}\|\|\nabla\bv_{j,h}^{n+1}\|\|\bv_{j,h}^{n+1}-2\bv_{j,h}^{n}+\bv_{j,h}^{n-1}\|\nonumber\\+\frac{C}{h}\|\nabla\bv_{j,h}^{'n}\|\|\nabla\bw_{j,h}^{n+1}\|\|\bw_{j,h}^{n+1}-2\bw_{j,h}^{n}+\bw_{j,h}^{n-1}\|\nonumber\\
+    +\|\bif_{1,j}(t^{n+1})\|_{-1}\|\nabla\bv_{j,h}^{n+1}\|+\|\bif_{2,j}(t^{n+1})\|_{-1}\|\nabla\bw_{j,h}^{n+1}\|.
+\end{align}
+Next, we apply Young's inequality using $\alpha_j/8$ with the forcing terms, and non-linear terms, noting that $\alpha_j>0$ by the assumed choice of $\theta$, and hiding terms on the left, and rearranging, we have
+
+\begin{align}
+    \frac{1}{4\Delta t}\bigg(\|\bv_{j,h}^{n+1}\|^2-\|\bv_{j,h}^n\|^2+\|2\bv_{j,h}^{n+1}-\bv_{j,h}^n\|^2-\|2\bv_{j,h}^n-\bv_{j,h}^{n-1}\|^2\nonumber\\
+    +\|\bw_{j,h}^{n+1}\|^2-\|\bw_{j,h}^n\|^2+\|2\bw_{j,h}^{n+1}-\bw_{j,h}^n\|^2-\|2\bw_{j,h}^n-\bw_{j,h}^{n-1}\|^2\bigg)\nonumber\\
+    +\frac{\bar{\nu}+\bar{\nu}_m}{4}\left(\|\nabla\bv_{j,h}^{n+1}\|^2+\|\nabla\bw_{j,h}^{n+1}\|^2\right)\blue{+\gamma\left(\|\nabla\cdot\bv_{j,h}^{n+1}\|^2+\|\nabla\cdot\bw_{j,h}^{n+1}\|^2\right)}\nonumber\\
+    +\left(\frac{1}{4\Delta t}-\frac{C}{\alpha_{j}h^2}\|\nabla\bw_{j,h}^{'n}\|^2\right)\|\bv_{j,h}^{n+1}-2\bv_{j,h}^n+\bv_{j,h}^{n-1}\|^2\nonumber\\+\left(\frac{1}{4\Delta t}-\frac{C}{\alpha_{j}h^2}\|\nabla\bv_{j,h}^{'n}\|^2\right)\|\bw_{j,h}^{n+1}-2\bw_{j,h}^n+\bw_{j,h}^{n-1}\|^2\nonumber\\\leq \frac{\left|\nu_j-\nu_{m,j}\right|(1+\theta)+2|\nu_j^{'}+\nu_{m,j}^{'}|}{4}\left(\|\nabla\bv_{j,h}^n\|^2+\|\nabla\bw_{j,h}^n\|^2\right)\nonumber\\+\frac{\left|\nu_j-\nu_{m,j}\right|\theta+|\nu_j^{'}+\nu_{m,j}^{'}|}{4}\left(\|\nabla\bv_{j,h}^{n-1}\|^2+\|\nabla\bw_{j,h}^{n-1}\|^2\right)\nonumber\\+\frac{2}{\alpha_j}\|\bif_{1,j}(t^{n+1})\|_{-1}^2+\frac{2}{\alpha_j}\|\bif_{2,j}(t^{n+1})\|_{-1}^2.
+\end{align}
+
+
+Now we define, $\alpha_{\min}:=\min\limits_{1\le j\le J}\alpha_j$, and choose $\Delta t\le\frac{\alpha_{\min}h^2}{C\max\limits_{1\le j\le J}\Big\{\|\nabla\bv_{j,h}^{'n}\|^2, \|\nabla\bw_{j,h}^{'n}\|^2\Big\}},$
+ drop non-negative terms from left, and rearrange, we have
+\begin{align}
+    &\frac{1}{4\Delta t}\bigg(\|\bv_{j,h}^{n+1}\|^2-\|\bv_{j,h}^n\|^2+\|2\bv_{j,h}^{n+1}-\bv_{j,h}^n\|^2-\|2\bv_{j,h}^n-\bv_{j,h}^{n-1}\|^2\nonumber\\
+    &+\|\bw_{j,h}^{n+1}\|^2-\|\bw_{j,h}^n\|^2+\|2\bw_{j,h}^{n+1}-\bw_{j,h}^n\|^2-\|2\bw_{j,h}^n-\bw_{j,h}^{n-1}\|^2\bigg)\nonumber\\
+    &+\frac{\bar{\nu}+\bar{\nu}_m}{4}\left(\|\nabla\bv_{j,h}^{n+1}\|^2-\|\nabla\bv_{j,h}^{n}\|^2+\|\nabla\bw_{j,h}^{n+1}\|^2-\|\nabla\bw_{j,h}^{n}\|^2\right)\nonumber\\&+\frac{\bar{\nu}+\bar{\nu}_m-\left|\nu_j-\nu_{m,j}\right|(1+\theta)-2|\nu_j^{'}+\nu_{m,j}^{'}|}{4}\left(\|\nabla\bv_{j,h}^n\|^2-\|\nabla\bv_{j,h}^{n-1}\|^2+\|\nabla\bw_{j,h}^n\|^2-\|\nabla\bw_{j,h}^{n-1}\|^2\right)\nonumber\\
+    &+\frac{\bar{\nu}+\bar{\nu}_m-\left|\nu_j-\nu_{m,j}\right|(1+2\theta)-3|\nu_j^{'}+\nu_{m,j}^{'}|}{4}\left(\|\nabla\bv_{j,h}^{n-1}\|^2+\|\nabla\bw_{j,h}^{n-1}\|^2\right)\nonumber\\&\blue{+\gamma\left(\|\nabla\cdot\bv_{j,h}^{n+1}\|^2+\|\nabla\cdot\bw_{j,h}^{n+1}\|^2\right)}\leq \frac{2}{\alpha_j}\|\bif_{1,j}(t^{n+1})\|_{-1}^2+\frac{2}{\alpha_j}\|\bif_{2,j}(t^{n+1})\|_{-1}^2.
+\end{align}
+Multiplying both sides by $4\Delta t$, and summing over time-steps $n=1,\cdots, M-1$, dropping non-negative terms from the left hand sides completes the proof.
+\end{proof}
+\begin{comment}
+\begin{align}
+    \|\bv_{j,h}^{M}\|^2+\|2\bv_{j,h}^{M}-\bv_{j,h}^{M-1}\|^2+\|\bw_{j,h}^{M}\|^2+\|2\bw_{j,h}^{M}-\bw_{j,h}^{M-1}\|^2\nonumber\\
+    +(\bar{\nu}+\bar{\nu}_m)\Delta t\left(\|\nabla\bv_{j,h}^{M}\|^2+\|\nabla\bw_{j,h}^{M}\|^2\right)\nonumber\\+\Big(\bar{\nu}+\bar{\nu}_m-\left|\nu_j-\nu_{m,j}\right|(1+\theta)-2|\nu_j^{'}+\nu_{m,j}^{'}|\Big)\Delta t\left(\|\nabla\bv_{j,h}^{M-1}\|^2+\|\nabla\bw_{j,h}^{M-1}\|^2\right)\nonumber\\
+    +\alpha_j\Delta t\sum_{n=1}^{M-1}\left(\|\nabla\bv_{j,h}^{n-1}\|^2+\|\nabla\bw_{j,h}^{n-1}\|^2\right) \nonumber\\\leq\|\bv_{j,h}^0\|^2+\|\bw_{j,h}^0\|^2+\|2\bv_{j,h}^1-\bv_{j,h}^0\|^2+\|2\bw_{j,h}^1-\bw_{j,h}^0\|^2\nonumber\\+(\bar{\nu}+\bar{\nu}_m)\Delta t\left(\|\nabla\bv_{j,h}^{1}\|^2+\|\nabla\bw_{j,h}^{1}\|^2+\|\nabla\bv_{j,h}^{0}\|^2+\|\nabla\bw_{j,h}^{0}\|^2\right)\nonumber\\+\frac{8\Delta t}{\alpha_j}\sum_{n=1}^{M-1}\Big(\|\bif_{1,j}(t^{n+1})\|_{-1}^2+\|\bif_{2,j}(t^{n+1})\|_{-1}^2\Big).
+\end{align}
+Simplifying
+
+\begin{align}
+    \|\bv_{j,h}^{M}\|^2+\|2\bv_{j,h}^{M}-\bv_{j,h}^{M-1}\|^2+\|\bw_{j,h}^{M}\|^2+\|2\bw_{j,h}^{M}-\bw_{j,h}^{M-1}\|^2\nonumber\\
+    +\alpha_j\Delta t\sum_{n=2}^{M}\left(\|\nabla\bv_{j,h}^{n}\|^2+\|\nabla\bw_{j,h}^{n}\|^2\right) \nonumber\\\leq\|\bv_{j,h}^0\|^2+\|\bw_{j,h}^0\|^2+\|2\bv_{j,h}^1-\bv_{j,h}^0\|^2+\|2\bw_{j,h}^1-\bw_{j,h}^0\|^2\nonumber\\+(\bar{\nu}+\bar{\nu}_m)\Delta t\left(\|\nabla\bv_{j,h}^{1}\|^2+\|\nabla\bw_{j,h}^{1}\|^2+\|\nabla\bv_{j,h}^{0}\|^2+\|\nabla\bw_{j,h}^{0}\|^2\right)\nonumber\\+\frac{8\Delta t}{\alpha_j}\sum_{n=1}^{M-1}\Big(\|\bif_{1,j}(t^{n+1})\|_{-1}^2+\|\bif_{2,j}(t^{n+1})\|_{-1}^2\Big).
+\end{align}
+To find appropriate $\theta$, we have \begin{align*}
+    &\alpha_j=\Bar{\nu}+\Bar{\nu}_{m}-|\nu_j-\nu_{m,j}|(1+2\theta)-3|\nu_j^{'}+\nu_{m,j}^{'}|>0\\
+    \implies& \Bar{\nu}+\Bar{\nu}_{m}-|\nu_j-\nu_{m,j}|(1+2\theta)>0
+\end{align*}
+Assume $\nu_j>\nu_{m,j}:$ then
+\begin{align*}
+    \Bar{\nu}+\Bar{\nu}_{m}-(\nu_j-\nu_{m,j})(1+2\theta)>0
+\end{align*}
+Summing over $j=1,\cdots, J$, we have
+\begin{align*}
+    J(\Bar{\nu}+\Bar{\nu}_{m})-(J\bar{\nu}-J\bar{\nu}_m)(1+2\theta)>0\\
+    \implies\frac{\bar{\nu}}{\bar{\nu}_m}<\frac{1+\theta}{\theta}
+\end{align*}
+
+Again, assuming $\nu_j<\nu_{m,j}:$ we can show similarly,$$\frac{\theta}{1+\theta}<\frac{\bar{\nu}}{\bar{\nu}_m}.$$
+Combining the above two cases, we have the following restriction on the average magnetic Prandtl number
+$$\frac{\theta}{1+\theta}<\frac{\bar{\nu}}{\bar{\nu}_m}<\frac{1+\theta}{\theta}.$$
+\end{comment}
+
+\section{Convergence} In this section, we will prove the error estimate of the Algorithm \ref{Algn1}.
+\begin{theorem}\label{convergence-theorem}
+Consider $m=\max\{2,k+1\}$, and $j=1,2,\cdots, J$, assume $(\bv_j,\bw_j,q_j)$ solves \eqref{els1}-\eqref{els3} and satisfies
+\begin{align*}
+ \bv_j,\bw_j\in L^\infty\big(0,T;\bH^{m}(\Omega)^d\big),\hspace{2mm} q_j,r_j\in L^2\big(0,T,L^2(\Omega)^d\big),\\
+ \bv_{j,t},\bv_{j,t}\in L^\infty\big(0,T,\bH^1(\Omega)^d\big), \bv_{j,tt},\bv_{j,tt}\in L^\infty\big(0,T,\bH^1(\Omega)^d\big), \bv_{j,ttt},\bv_{j,ttt}&\in L^\infty\big(0,T,\bL^2(\Omega)^d\big).
+\end{align*}
+Then the solution $(\bv_{j,h},\bw_{j,h})$ to the Algorithm \ref{Algn1} converges to the true solution: For any 
+$$\Delta t\le\frac{\alpha_{\min}h^2}{C\max\limits_{1\le j\le J}\Big\{\|\nabla\bv_{j,h}^{'n}\|^2, \|\nabla\bw_{j,h}^{'n}\|^2\Big\}},$$
+one has
+\begin{align}
+    \|<\bv>(T)-<\bv_h>^M\|+\|<\bw>(T)-<\bw_h>^M\|\nonumber\\+(\alpha_{\min}\Delta{t})^{\frac12}\sum_{n=2}^M\Big\{\|\nabla\big(<\bv>(t^n)-<\bv_h>^n\big)\|^2+\|\nabla\big(<\bw>(t^n)-<\bw_h>^n\big)\|^2\Big\}^{\frac{1}{2}}\nonumber\\+(\gamma\Delta t)^\frac{1}{2}\sum_{n=2}^M\Big\{\|\nabla\cdot\big(<\bv>(t^n)-<\bv_h>^n\big)\|^2+\|\nabla\cdot\big(<\bw>(t^n)-<\bw_h>^n\big)\|^2\Big\}^{\frac{1}{2}}\nonumber\\\leq C\bigg(h^{k}+(\Delta{t})^2+(1-\theta)\Delta t\sqrt{\frac{1}{J}\sum\limits_{j=1}^J(\nu_j-\nu_{m,j})^2}\bigg).
+\end{align}
+\end{theorem}
+
+\begin{proof}
+At first we build an error equation. Testing \eqref{els1}, and \eqref{els2} with $\bchi_{j,h}\in\bV_h$, and $\bl_{j,h}\in\bV_h$, respectively at the time level $t^{n+1}$, the continuous variational formulations can be written
+\begin{align}
+\bigg(\frac{3\bv_j(t^{n+1})-4\bv_j(t^n)+\bv_j(t^{n-1})}{2\Delta t},\bchi_{j,h}\bigg)+b^*\big(\bw_j(t^{n+1}), \bv_j(t^{n+1}),\bchi_{j,h}\big)\nonumber\\+\frac{\bar{\nu}+\bar{\nu}_{m}}{2}\big(\nabla \bv_j(t^{n+1}), \nabla\bchi_{j,h}\big)\textcolor{blue}{+\frac{\nu_j^{'}+\nu_{m,j}^{'}}{2}\big(\nabla(2\bv_j(t^n)-\bv_j(t^{n-1})),\nabla\bchi_{j,h}\big)}\nonumber\\ +\frac{\nu_j-\nu_{m,j}}{2}\big((1+\theta)\nabla \bw_j(t^n)-\theta\nabla  \bw_j(t^{n-1}),\bchi_{j,h}\big)\nonumber\\\blue{-\big(q_j(t^{n+1}),\nabla\cdot\bchi_{j,h}\big)+\gamma\big(\nabla\cdot\bv_j(t^{n+1}),\nabla\cdot\bchi_{j,h}\big)} =\big(\bif_{1,j}(t^{n+1}),\bchi_{j,h}\big)\nonumber\\-\frac{\nu^{'}_j+\nu^{'}_{m,j}}{2}\Big(\nabla\big(\bv_j(t^{n+1})\textcolor{blue}{-2\bv_j(t^n)+\bv_j(t^{n-1})}\big),\nabla\bchi_{j,h}\Big)\nonumber\\-\frac{\nu_j-\nu_{m,j}}{2}\big(\nabla( \bw_j(t^{n+1})-(1+\theta)\bw_j(t^n)+\theta \bw_j(t^{n-1})),\bchi_{j,h}\big)\nonumber\\-\bigg(\bv_{j,t}(t^{n+1})-\frac{3\bv_j(t^{n+1})-4\bv_j(t^n)+\bv_j(t^{n-1})}{2\Delta t}, \bchi_{j,h}\bigg), \label{conweakn1}
+\end{align}
+and
+\begin{align}
+\bigg(\frac{3\bw_j(t^{n+1})-4\bw_j(t^n)+\bw_j(t^{n-1})}{2\Delta t},\bl_{j,h}\bigg)+b^*\big(\bv_j(t^{n+1}), \bw_j(t^{n+1}),\bl_{j,h}\big)\nonumber\\+\frac{\bar{\nu}+\bar{\nu}_{m}}{2}\big(\nabla \bw_j(t^{n+1}), \nabla\bl_{j,h}\big)\textcolor{blue}{+\frac{\nu_j^{'}+\nu_{m,j}^{'}}{2}\big(\nabla(2\bw_j(t^n)-\bw_j(t^{n-1})),\nabla\bl_{j,h}\big)}\nonumber\\ +\frac{\nu_j-\nu_{m,j}}{2}\big((1+\theta)\nabla \bv_j(t^n)-\theta\nabla  \bv_j(t^{n-1}),\bl_{j,h}\big)\nonumber\\\blue{-\big(r_j(t^{n+1}),\nabla\cdot\bl_{j,h}\big)+\gamma\big(\nabla\cdot\bw_j(t^{n+1}),\nabla\cdot\bl_{j,h}\big)} =\big(\bif_{2,j}(t^{n+1}),\bl_{j,h}\big)\nonumber\\\textcolor{blue}{-\frac{\nu^{'}_j+\nu^{'}_{m,j}}{2}\Big(\nabla\big(\bw_j(t^{n+1})-2\bw_j(t^n)+\bw_j(t^{n-1})\big),\nabla\bl_{j,h}\Big)}\nonumber\\-\frac{\nu_j-\nu_{m,j}}{2}\big(\nabla( \bv_j(t^{n+1})-(1+\theta)\bv_j(t^n)+\theta \bv_j(t^{n-1})),\bl_{j,h}\big)\nonumber\\-\bigg(\bw_{j,t}(t^{n+1})-\frac{3\bw_j(t^{n+1})-4\bw_j(t^n)+\bw_j(t^{n-1})}{2\Delta t}, \bl_{j,h}\bigg).\label{conweakn2}
+\end{align}
+\blue{Note $\big(\nabla\cdot\bv_j(t^{n+1}),\nabla\cdot\bchi_{j,h}\big)=\big(\nabla\cdot\bw_j(t^{n+1}),\nabla\cdot\bl_{j,h}\big)=0$.} Denote $\be_{\bv,j}^n:=\bv_j(t^n)-\bv_{j,h}^n,\hspace{1mm}\text{and}\hspace{1mm}\be_{\bw,j}^n:=\bw_j(t^n)-\bw_{j,h}^n.$ Subtracting \eqref{weaknew1} and \eqref{weaknew2} from equation \eqref{conweakn1} and \eqref{conweakn2}, respectively yields
+\begin{align}
+\bigg(&\frac{3\be_{\bv,j}^{n+1}-4\be_{\bv,j}^n+\be_{\bv,j}^{n-1}}{2\Delta t},\bchi_{j,h}\bigg)+\frac{\bar{\nu}+\bar{\nu}_m}{2}(\nabla \be_{\bv,j}^{n+1},\nabla \bchi_{j,h})\textcolor{blue}{+\frac{\nu_j^{'}+\nu_{m,j}^{'}}{2}\Big(\nabla\big(2\be_{\bv,j}^n-\be_{\bv,j}^{n-1}\big),\nabla\bchi_{j,h}\Big)}\nonumber\\&+\frac{\nu_j-\nu_{m,j}}{2}\big((1+\theta)\nabla \be_{\bw,j}^n-\theta\nabla \be_{\bw,j}^{n-1},\nabla\bchi_{j,h}\big)+b^*\big(2\be_{\bw,j}^n-\be_{\bw,j}^{n-1}, \bv_j(t^{n+1}),\bchi_{j,h}\big)\nonumber\\&+b^*\big(2\bw_{j,h}^n-\bw_{j,h}^{n-1}, \be_{\bv,j}^{n+1},\bchi_{j,h}\big)-b^*\big(\bw_{j,h}^{'n},\be_{\bv,j}^{n+1}-2\be_{\bv,j}^n+\be_{\bv,j}^{n-1},\bchi_{j,h}\big)\nonumber\\&\blue{-\big(q_j(t^{n+1}),\nabla\cdot\bchi_{j,h}\big)+\gamma\big(\nabla\cdot\be_{\bv,j}^{n+1},\nabla\cdot\bchi_{j,h}\big)}=-G_1(t,\bv_j,\bw_j,\bchi_{j,h}),
+\end{align}
+and
+\begin{align}
+\bigg(&\frac{3\be_{\bw,j}^{n+1}-4\be_{\bw,j}^n+\be_{\bw,j}^{n-1}}{2\Delta t},\bl_{j,h}\bigg)+\frac{\bar{\nu}+\bar{\nu}_m}{2}(\nabla e_{\bw,j}^{n+1},\nabla \bl_{j,h})\textcolor{blue}{+\frac{\nu_j^{'}+\nu_{m,j}^{'}}{2}\Big(\nabla\big(2\be_{\bw,j}^n-\be_{\bw,j}^{n-1}\big),\nabla\bl_{j,h}\Big)}\nonumber\\&+\frac{\nu_j-\nu_{m,j}}{2}\big((1+\theta)\nabla e_{\bv,j}^n-\theta\nabla e_{\bv,j}^{n-1},\nabla\bl_{j,h}\big)+b^*\big(2\be_{\bw,j}^n-\be_{\bv,j}^{n-1}, \bw_j(t^{n+1}),\bl_{j,h}\big)\nonumber\\&+b^*\big(2\bv_{j,h}^n-\bv_{j,h}^{n-1}, \be_{\bw,j}^{n+1},\bl_{j,h}\big)-b^*(\bv_{j,h}^{'n},\be_{\bw,j}^{n+1}-2\be_{\bw,j}^n+\be_{\bw,j}^{n-1},\bl_{j,h})\nonumber\\&\blue{-\big(r_j(t^{n+1}),\nabla\cdot\bl_{j,h}\big)+\gamma\big(\nabla\cdot\be_{\bw,j}^{n+1},\nabla\cdot\bl_{j,h}\big)}=-G_2(t,\bv_j,\bw_j,\bl_{j,h}),
+\end{align}
+where \begin{align*}
+G_1(t,&\bv_j,\bw_j,\bchi_{j,h}):=b^*\big(\bw_j(t^{n+1})-2\bw_j(t^n)+\bw_j(t^{n-1}), \bv_j(t^{n+1}),\bchi_{j,h})\nonumber\\&+b^*\big(\bw_{j,h}^{'n},\bv_j(t^{n+1})-2\bv_j(t^n)+\bv_j(t^{n-1}),\bchi_{j,h})\nonumber\\&+\frac{\nu^{'}_j+\nu^{'}_{m,j}}{2}\Big(\nabla\big(\bv_j(t^{n+1})\textcolor{blue}{-2\bv_j(t^{n})+\bv_j(t^{n-1})}\big),\nabla\bchi_{j,h}\Big)\nonumber\\&+\frac{\nu_j-\nu_{m,j}}{2}\big(\nabla( \bw_j(t^{n+1})-(1+\theta)\bw_j(t^n)+\theta \bw_j(t^{n-1})),\nabla\bchi_{j,h}\big)\nonumber\\&+\bigg(\bv_{j,t}(t^{n+1})-\frac{3\bv_j(t^{n+1})-4\bv_j(t^n)+\bv_j(t^{n-1})}{2\Delta t}, \bchi_{j,h}\bigg),
+\end{align*}
+and
+
+\begin{align*}
+G_2(t,&\bv_j,\bw_j,\bl_{j,h}):=b^*\big(\bv_j(t^{n+1})-2\bv_j(t^n)+\bv_j(t^{n-1}), \bw_j(t^{n+1}),\bl_{j,h})\nonumber\\&+b^*\big(\bv_{j,h}^{'n},\bw_j(t^{n+1})-2\bw_j(t^n)+\bw_j(t^{n-1}),\bl_{j,h}\big)\nonumber\\&+\frac{\nu^{'}_j+\nu^{'}_{m,j}}{2}\Big(\nabla\big(\bw_j(t^{n+1})\textcolor{blue}{-2\bw_j(t^{n})+\bw_j(t^{n-1}})\big),\nabla\bl_{j,h}\Big)\nonumber\\&+\frac{\nu_j-\nu_{m,j}}{2}\big(\nabla( \bv_j(t^{n+1})-(1+\theta)\bv_j(t^n)+\theta \bv_j(t^{n-1})),\nabla\bl_{j,h}\big)\nonumber\\&+\bigg(\bw_{j,t}(t^{n+1})-\frac{3\bw_j(t^{n+1})-4\bw_j(t^n)+\bw_j(t^{n-1})}{2\Delta t}, \bl_{j,h}\bigg).
+\end{align*}
+Now we decompose the errors as
+\begin{align*}
+    \be_{\bv,j}^n:& = \bv_j(t^n)-\bv_{j,h}^n=(\bv_j(t^n)-\tilde{\bv}_j^n)-(\bv_{j,h}^n-\tilde{\bv}_j^n):=\bfeta_{\bv,j}^n-\bphi_{j,h}^n,\\
+    \be_{\bw,j}^n: &= \bw_j(t^n)-\bw_{j,h}^n=(\bw_j(t^n)-\tilde{\bw}_j^n)-(\bw_{j,h}^n-\tilde{\bw}_j^n):=\textcolor{black}{\bfeta}_{\bw,j}^n-\bpsi_{j,h}^n,
+\end{align*}
+where $\tilde{\bv}_j^n: =P_{\bV_h}^{L^2}(\bv_j(t^n))\in \bV_h$ and $\tilde{\bw}_j^n: =P_{\bV_h}^{L^2}(\bw_j(t^n))\in \bV_h$ are the $L^2$ projections of $\bv_j(t^n)$ and $\bw_j(t^n)$ into $\bV_h$, respectively. Note that $(\bfeta_{\bv,j}^n,\bv_{j,h})=(\bfeta_{\bw,j}^n,\bv_{j,h})=0\hspace{2mm} \forall \bv_{j,h}\in \bV_h$.  Rewriting, we have for $\bchi_{j,h},\bl_{j,h}\in \bV_h$
+\begin{align}
+\bigg(&\frac{3\bphi_{j,h}^{n+1}-4\bphi_{j,h}^n+\bphi_{j,h}^{n-1}}{2\Delta t},\bchi_{j,h}\bigg)+\frac{\bar{\nu}+\bar{\nu}_m}{2}(\nabla \bphi_{j,h}^{n+1},\nabla \bchi_{j,h})+\frac{\nu_j^{'}+\nu_{m,j}^{'}}{2}\big(\nabla(2\bphi_{j,h}^n-\bphi_{j,h}^{n-1}),\nabla\bchi_{j,h}\big)\nonumber\\&+\frac{\nu_j-\nu_{m,j}}{2}\big((1+\theta)\nabla \bpsi_{j,h}^n-\theta\nabla \bpsi_{j,h}^{n-1},\nabla\bchi_{j,h}\big)+b^*\big(2\bpsi_{j,h}^n-\bpsi_{j,h}^{n-1}, \bv_j(t^{n+1}),\bchi_{j,h})\nonumber\\&+b^*(2\bw_{j,h}^n-\bw_{j,h}^{n-1}, \bphi_{j,h}^{n+1},\bchi_{j,h})-b^*(\bw_{j,h}^{'n},\bphi_{j,h}^{n+1}-2\bphi_{j,h}^n+\bphi_{j,h}^{n-1},\bchi_{j,h})+\blue{\gamma\big(\nabla\cdot\bphi_{j,h}^{n+1},\nabla\cdot\bchi_{j,h}\big)}\nonumber\\&=\frac{\nu_j-\nu_{m,j}}{2}\big((1+\theta)\nabla \bfeta_{\bw,j}^n-\theta\nabla \bfeta_{\bw,j}^{n-1},\nabla\bchi_{j,h}\big)+\frac{\bar{\nu}+\bar{\nu}_m}{2}(\nabla \bfeta_{\bv,j}^{n+1},\nabla \bchi_{j,h})\nonumber\\&+\frac{\nu_j^{'}+\nu_{m,j}^{'}}{2}\big(\nabla(2\bfeta_{\bv,j}^n-\bfeta_{\bv,j}^{n-1}),\nabla\bchi_{j,h}\big)+b^*\big(2\bfeta_{\bw,j}^n-\bfeta_{\bw,j}^{n-1}, \bv_j(t^{n+1}),\bchi_{j,h}\big)\nonumber\\&+b^*(2\bw_{j,h}^n-\bw_{j,h}^{n-1}, \bfeta_{\bv,j}^{n+1},\bchi_{j,h})-b^*(\bw_{j,h}^{'n},\bfeta_{\bv,j}^{n+1}-2\bfeta_{\bv,j}^n+\bfeta_{\bv,j}^{n-1},\bchi_{j,h})\nonumber\\&\blue{-\big(q_j(t^{n+1}),\nabla\cdot\bchi_{j,h}\big)+\gamma\big(\nabla\cdot\bfeta_{\bv,j}^{n+1},\nabla\cdot\bchi_{j,h}\big)}+G_1(t,\bv_j,\bw_j,\bchi_{j,h}),
+\label{phi2n}
+\end{align}
+and
+\begin{align}
+\bigg(&\frac{3\bpsi_{j,h}^{n+1}-4\bpsi_{j,h}^n+\bpsi_{j,h}^{n-1}}{2\Delta t},\bl_{j,h}\bigg)+\frac{\bar{\nu}+\bar{\nu}_m}{2}(\nabla \bpsi_{j,h}^{n+1},\nabla \bl_{j,h})+\frac{\nu_j^{'}+\nu_{m,j}^{'}}{2}\big(\nabla(2\bpsi_{j,h}^n-\bpsi_{j,h}^{n-1}),\nabla\bl_{j,h}\big)\nonumber\\&+\frac{\nu_j-\nu_{m,j}}{2}\big((1+\theta)\nabla \bphi_{j,h}^n-\theta\nabla \bphi_{j,h}^{n-1},\nabla\bl_{j,h}\big)+b^*\big(2\bphi_{j,h}^n-\bphi_{j,h}^{n-1}, \bw_j(t^{n+1}),\bl_{j,h}\big)\nonumber\\&+b^*(2\bv_{j,h}^n-\bv_{j,h}^{n-1},\bpsi_{j,h}^{n+1},\bl_{j,h})-b^*(\bv_{j,h}^{'n},\bpsi_{j,h}^{n+1}-2\bpsi_{j,h}^n+\bpsi_{j,h}^{n-1},\bl_{j,h})+\blue{\gamma\big(\nabla\cdot\bpsi_{j,h}^{n+1},\nabla\cdot\bl_{j,h}\big)}\nonumber\\&=\frac{\nu_j-\nu_{m,j}}{2}\big((1+\theta)\nabla \bfeta_{\bv,j}^n-\theta\nabla \bfeta_{\bv,j}^{n-1},\nabla\bl_{j,h}\big)+\frac{\bar{\nu}+\bar{\nu}_m}{2}(\nabla \bfeta_{\bw,j}^{n+1},\nabla \bl_{j,h})\nonumber\\&+\frac{\nu_j^{'}+\nu_{m,j}^{'}}{2}\big(\nabla(2\bfeta_{\bw,j}^n-\bfeta_{\bw,j}^{n-1}),\nabla\bl_{j,h}\big)+b^*\big(2\bfeta_{\bv,j}^n-\bfeta_{\bv,j}^{n-1}, \bw_j(t^{n+1}),\bl_{j,h}\big)\nonumber\\&+b^*(2\bv_{j,h}^n-\bv_{j,h}^{n-1},\bfeta_{\bw,j}^{n+1},\bl_{j,h})-b^*(\bv_{j,h}^{'n},\bfeta_{\bw,j}^{n+1}-2\bfeta_{\bw,j}^n+\bfeta_{\bw,j}^{n-1},\bl_{j,h})\nonumber\\&\blue{-\big(r_j(t^{n+1}),\nabla\cdot\bl_{j,h}\big)+\gamma\big(\nabla\cdot\bfeta_{\bw,j}^{n+1},\nabla\cdot\bl_{j,h}\big)}+G_2(t,\bv_j,\bw_j,\bl_{j,h}).
+\label{psi2n}
+\end{align}
+Choose $\bchi_{j,h}=\bphi_{j,h}^{n+1}, \bl_{j,h}=\bpsi_{j,h}^{n+1}$, and use the identity \eqref{ident} in \eqref{phi2n} and \eqref{psi2n}, to obtain
+\begin{align}
+    &\frac{1}{4\Delta t}\left(\|\bphi_{j,h}^{n+1}\|^2-\|\bphi_{j,h}^{n}\|^2+\|2\bphi_{j,h}^{n+1}-\bphi_{j,h}^{n}\|^2-\|2\bphi_{j,h}^{n}-\bphi_{j,h}^{n-1}\|^2+\|\bphi_{j,h}^{n+1}-2\bphi_{j,h}^{n}+\bphi_{j,h}^{n-1}\|^2\right)\nonumber\\&
+    +\frac{\bar{\nu}+\bar{\nu}_m}{2}\|\nabla\bphi_{j,h}^{n+1}\|^2+\blue{\gamma\|\nabla\cdot\bphi_{j,h}^{n+1}\|^2}\leq(1+\theta)\frac{|\nu_j-\nu_{m,j}|}{2}\bigg\{|(\nabla\bpsi_{j,h}^{n},\nabla\bphi_{j,h}^{n+1})|+|(\nabla\bfeta_{\bw,j}^{n},\nabla\bphi_{j,h}^{n+1})|\bigg\}\nonumber\\&
+    +\theta\frac{|\nu_j-\nu_{m,j}|}{2}\bigg\{|(\nabla\bpsi_{j,h}^{n-1},\nabla\bphi_{j,h}^{n+1})|+|(\nabla\bfeta_{\bw,j}^{n-1},\nabla\bphi_{j,h}^{n+1})|\bigg\}
+    +\frac{|\nu_j^{'}+\nu_{m,j}^{'}|}{2}|\big(\nabla(2\bphi_{j,h}^n-\bphi_{j,h}^{n-1}),\nabla\bphi_{j,h}^{n+1}\big)|\nonumber\\&
+    +\frac{\bar{\nu}+\bar{\nu}_m}{2}|(\nabla\bfeta_{\bv,j}^{n+1},\nabla\bphi_{j,h}^{n+1})|
+    +|b^*\big(2\bfeta_{\bw,j}^{n}-\bfeta_{\bw,j}^{n-1},\bv_j(t^{n+1}),\bphi_{j,h}^{n+1}\big)|+|b^*\big(2\bw_{j,h}^{n}-\bw_{j,h}^{n-1},\bfeta_{\bv,j}^{n+1},\bphi_{j,h}^{n+1}\big)|\nonumber\\&
+    +|b^*\big(\bw_{j,h}^{'n},\bfeta_{\bv,j}^{n+1}-2\bfeta_{\bv,j}^{n}+\bfeta_{\bv,j}^{n-1},\bphi_{j,h}^{n+1}\big)|+|b^*\big(2\bpsi_{j,h}^{n}-\bpsi_{j,h}^{n-1},\bv_j(t^{n+1}),\bphi_{j,h}^{n+1}\big)|\nonumber\\&
+    +|b^*\big(\bw_{j,h}^{'n},\bphi_{j,h}^{n+1}-2\bphi_{j,h}^{n}+\bphi_{j,h}^{n-1},\bphi_{j,h}^{n+1}\big)|\blue{+|\big(q_j(t^{n+1}),\nabla\cdot\bphi_{j,h}^{n+1}\big)|+\gamma|\big(\nabla\cdot\bfeta_{\bv,j}^{n+1},\nabla\cdot\bphi_{j,h}^{n+1}\big)|}\nonumber\\&+|G_1(t,\bv_j,\bw_j,\bphi_{j,h}^{n+1})|,\label{phi-introduced-first-time}
+\end{align}
+and
+\begin{align}
+    &\frac{1}{4\Delta t}\left(\|\bpsi_{j,h}^{n+1}\|^2-\|\bpsi_{j,h}^{n}\|^2+\|2\bpsi_{j,h}^{n+1}-\bpsi_{j,h}^{n}\|^2-\|2\bpsi_{j,h}^{n}-\bpsi_{j,h}^{n-1}\|^2+\|\bpsi_{j,h}^{n+1}-2\bpsi_{j,h}^{n}+\bpsi_{j,h}^{n-1}\|^2\right)\nonumber\\&
+    +\frac{\bar{\nu}+\bar{\nu}_m}{2}\|\nabla\bpsi_{j,h}^{n+1}\|^2+\blue{\gamma\|\nabla\cdot\bpsi_{j,h}^{n+1}\|^2}\leq(1+\theta)\frac{|\nu_j-\nu_{m,j}|}{2}\bigg\{|(\nabla\bphi_{j,h}^{n},\nabla\bpsi_{j,h}^{n+1})|+|(\nabla\bfeta_{\bv,j}^{n},\nabla\bpsi_{j,h}^{n+1})|\bigg\}\nonumber\\&
+    +\theta\frac{|\nu_j-\nu_{m,j}|}{2}\bigg\{|(\nabla\bphi_{j,h}^{n-1},\nabla\bpsi_{j,h}^{n+1})|+|(\nabla\bfeta_{\bv,j}^{n-1},\nabla\bpsi_{j,h}^{n+1})|\bigg\}+\frac{|\nu_j^{'}+\nu_{m,j}^{'}|}{2}|\big(\nabla(2\bpsi_{j,h}^n-\bpsi_{j,h}^{n-1}),\nabla\bpsi_{j,h}^{n+1}\big)|\nonumber\\&
+    +\frac{\bar{\nu}+\bar{\nu}_m}{2}|(\nabla\bfeta_{\bw,j}^{n+1},\nabla\bpsi_{j,h}^{n+1})|
+    +|b^*\big(2\bfeta_{\bv,j}^{n}-\bfeta_{\bv,j}^{n-1},\bw_j(t^{n+1}),\bpsi_{j,h}^{n+1}\big)|+|b^*\big(2\bv_{j,h}^{n}-\bv_{j,h}^{n-1},\bfeta_{\bw,j}^{n+1},\bpsi_{j,h}^{n+1}\big)|\nonumber\\&
+    +|b^*\big(\bv_{j,h}^{'n},\bfeta_{\bw,j}^{n+1}-2\bfeta_{\bw,j}^{n}+\bfeta_{\bw,j}^{n-1},\bpsi_{j,h}^{n+1}\big)|+|b^*\big(2\bphi_{j,h}^{n}-\bphi_{j,h}^{n-1},\bw_j(t^{n+1}),\bpsi_{j,h}^{n+1}\big)|\nonumber\\&
+    +|b^*\big(\bv_{j,h}^{'n},\bpsi_{j,h}^{n+1}-2\bpsi_{j,h}^{n}+\bpsi_{j,h}^{n-1},\bpsi_{j,h}^{n+1}\big)|\blue{+|\big(r_j(t^{n+1}),\nabla\cdot\bpsi_{j,h}^{n+1}\big)|+\gamma|\big(\nabla\cdot\bfeta_{\bw,j}^{n+1},\nabla\cdot\bpsi_{j,h}^{n+1}\big)|}\nonumber\\&+|G_2(t,\bv_j,\bw_j,\bpsi_{j,h}^{n+1})|.
+    \label{psi-introduced-first-time}
+\end{align}
+We now turn our attention to finding bounds on the right-hand-side terms of \eqref{phi-introduced-first-time}. Applying Cauchy-Schwarz and Young's inequalities on the first six terms provides.
+\begin{align*}
+    (1+\theta)\frac{|\nu_j-\nu_{m,j}|}{2}|\big(\nabla\bpsi_{j,h}^{n},\nabla\bphi_{j,h}^{n+1}\big)|&\leq(1+\theta)\frac{|\nu_j-\nu_{m,j}|}{4}\big(\|\nabla\bpsi_{j,h}^{n}\|^2+\|\nabla\bphi_{j,h}^{n+1}\|^2\big),\nonumber\\
+    \theta\frac{|\nu_j-\nu_{m,j}|}{2}|\big(\nabla\bpsi_{j,h}^{n-1},\nabla\bphi_{j,h}^{n+1}\big)|&\leq\theta\frac{|\nu_j-\nu_{m,j}|}{4}\big(\|\nabla\bpsi_{j,h}^{n-1}\|^2+\|\nabla\bphi_{j,h}^{n+1}\|^2\big),\nonumber\\
+    (1+\theta)\frac{|\nu_j-\nu_{m,j}|}{2}|\big(\nabla\bfeta_{\bw,j}^{n},\nabla\bphi_{j,h}^{n+1}\big)|&\leq\frac{\alpha_j}{36}\|\nabla\bphi_{j,h}^{n+1}\|^2+\frac{9(1+\theta)^2(\nu_j-\nu_{m,j})^2}{4\alpha_j}\|\nabla\bfeta_{\bw,j}^{n}\|^2,\nonumber\\
+    \theta\frac{|\nu_j-\nu_{m,j}|}{2}|\big(\nabla\bfeta_{\bw,j}^{n-1},\nabla\bphi_{j,h}^{n+1}\big)|&\leq\frac{\alpha_j}{36}\|\nabla\bphi_{j,h}^{n+1}\|^2+\frac{9\theta^2(\nu_j-\nu_{m,j})^2}{4\alpha_j}\|\nabla\bfeta_{\bw,j}^{n-1}\|^2,\nonumber\\\frac{\nu_j^{'}+\nu_{m,j}^{'}}{2}|\big(\nabla(2\bphi_{j,h}^n-\bphi_{j,h}^{n-1}),\nabla\bphi_{j,h}^{n+1}\big)|&\leq\frac{|\nu_j^{'}+\nu_{m,j}^{'}|}{4}(3\|\nabla\bphi_{j,h}^{n+1}\|^2+2\|\nabla\bphi_{j,h}^n\|^2+\|\nabla\bphi_{j,h}^{n-1}\|^2),\nonumber\\
+    \frac{\bar{\nu}+\bar{\nu}_m}{2}|\big(\nabla\bfeta_{\bv,j}^{n+1},\nabla\bphi_{j,h}^{n+1}\big)|&\leq\frac{\alpha_j}{36}\|\nabla\bphi_{j,h}^{n+1}\|^2+\frac{9(\bar{\nu}+\bar{\nu}_m)^2}{4\alpha_j}\|\nabla\bfeta_{\bv,j}^{n+1}\|^2.
+\end{align*}
+Applying Young's inequalities with \eqref{nonlinearbound} on the first three nonlinear terms yields
+\begin{align*}
+     |b^*\big(2\bfeta_{\bw,j}^{n}-\bfeta_{\bw,j}^{n-1},\bv_j(t^{n+1}),\bphi_{j,h}^{n+1}\big)|&\leq{C}\|\nabla(2\bfeta_{\bw,j}^{n}-\bfeta_{\bw,j}^{n-1})\|\|\nabla\bv_j(t^{n+1})\|\|\nabla\bphi_{j,h}^{n+1}\|\nonumber\\
+     &\leq\frac{\alpha_j}{36}\|\nabla\bphi_{j,h}^{n+1}\|^2+\frac{C}{\alpha_j}\|\nabla(2\bfeta_{\bw,j}^{n}-\bfeta_{\bw,j}^{n-1})\|^2\|\nabla\bv_j(t^{n+1})\|^2,\nonumber\\
+    |b^*\big(2\bw_{j,h}^{n}-\bw_{j,h}^{n-1},\bfeta_{\bv,j}^{n+1},\bphi_{j,h}^{n+1}\big)|&\leq{C}\|\nabla(2\bw_{j,h}^{n}-\bw_{j,h}^{n-1})\|\|\nabla\bfeta_{\bv,j}^{n+1}\|\|\nabla\bphi_{j,h}^{n+1}\|\nonumber\\
+     &\leq\frac{\alpha_j}{36}\|\nabla\bphi_{j,h}^{n+1}\|^2+\frac{C}{\alpha_j}\|\nabla(2\bw_{j,h}^{n}-\bw_{j,h}^{n-1})\|^2\|\nabla\bfeta_{\bv,j}^{n+1}\|^2,\nonumber\\
+     |b^*\big(\bw_{j,h}^{'n},\bfeta_{\bv,j}^{n+1}-\bfeta_{\bv,j}^{n}+ \bfeta_{\bv,j}^{n-1},\bphi_{j,h}^{n+1}\big)|&\leq{C}\|\nabla\bw_{j,h}^{'n}\|\|\nabla(\bfeta_{\bv,j}^{n+1}-\bfeta_{\bv,j}^{n}+\bfeta_{\bv,j}^{n-1})\|\|\nabla\bphi_{j,h}^{n+1}\|\nonumber\\
+     &\leq\frac{\alpha_j}{36}\|\nabla\bphi_{j,h}^{n+1}\|^2+\frac{C}{\alpha_j}\|\nabla\bw_{j,h}^{'n}\|^2\|\nabla(\bfeta_{\bv,j}^{n+1}-\bfeta_{\bv,j}^{n}+\bfeta_{\bv,j}^{n-1})\|^2.
+\end{align*}
+For the fourth nonlinear term, we use H\"{o}lder's inequality, Sobolev embedding theorems, Agmon's, Poincare's and Young's inequalities to reveal
+\begin{align}
+     |&b^*\big(2\bpsi_{j,h}^{n}-\bpsi_{j,h}^{n-1},\bv_j(t^{n+1}),\bphi_{j,h}^{n+1}\big)|\nonumber\\&\leq{C}\|2\bpsi_{j,h}^{n}-\bpsi_{j,h}^{n-1}\|\|\nabla\bv_j(t^{n+1})\|_{\bL^6}\|\bphi_{j,h}^{n+1}\|_{\bL^3}+C\|2\bpsi_{j,h}^{n}-\bpsi_{j,h}^{n-1}\|\|\nabla\bphi_{j,h}^{n+1}\|\|\bv_j(t^{n+1})\|_{\infty}\nonumber\\
+     &\leq{C}\|2\bpsi_{j,h}^{n}-\bpsi_{j,h}^{n-1}\|\|\bv_j(t^{n+1})\|_{\bH^2}\|\bphi_{j,h}^{n+1}\|^{1/2}\|\nabla\bphi_{j,h}^{n+1}\|^{1/2}+C\|2\bpsi_{j,h}^{n}-\bpsi_{j,h}^{n-1}\|\|\nabla\bphi_{j,h}^{n+1}\|\|\bv_j(t^{n+1})\|_{\bH^2}\nonumber\\
+     &\leq{C}\|2\bpsi_{j,h}^{n}-\bpsi_{j,h}^{n-1}\|\|\bv_j(t^{n+1})\|_{\bH^2}\|\nabla\bphi_{j,h}^{n+1}\|\nonumber\\
+     &\leq\frac{\alpha_j}{36}\|\nabla\bphi_{j,h}^{n+1}\|^2+\frac{C}{\alpha_j}\|\bv_{j}(t^{n+1})\|^2_{\bH^2}\|2\bpsi_{j,h}^{n}-\bpsi_{j,h}^{n-1}\|^2.
+\end{align}
+Applying inverse and Young's inequalities with \eqref{nonlinearbound} on the fifth nonlinear terms yields
+\begin{align}
+     |b^*\big(\bw_{j,h}^{'n},\bphi_{j,h}^{n+1}-2\bphi_{j,h}^{n}+ \bphi_{j,h}^{n-1},\bphi_{j,h}^{n+1}\big)|&\leq{C}\|\nabla\bw_{j,h}^{'n}\|\|\nabla(\bphi_{j,h}^{n+1}-2\bphi_{j,h}^{n}+\bphi_{j,h}^{n-1})\|\|\nabla\bphi_{j,h}^{n+1}\|\nonumber\\
+     &\leq\frac{\alpha_j}{36}\|\nabla\bphi_{j,h}^{n+1}\|^2+\frac{C}{\alpha_j{h}^2}\|\nabla\bw_{j,h}^{'n}\|^2\|\bphi_{j,h}^{n+1}-2\bphi_{j,h}^{n}+\bphi_{j,h}^{n-1}\|^2.
+\end{align}
+\blue{Since $\bphi_{j,h}^{n+1}\in\bV_h$, we rewrite the pressure term, apply Cauchy-Schwarz and Young's inequalities to get}
+\blue{\begin{align*}
+  |\big(q_j(t^{n+1}),\nabla\cdot\bphi_{j,h}^{n+1}\big)|&=|\big(q_j(t^{n+1})-q_{j,h}^{n+1},\nabla\cdot\bphi_{j,h}^{n+1}\big)|\\&\le\frac{\gamma}{4}\|\nabla\cdot\bphi_{j,h}^{n+1}\|^2+\gamma^{-1}\|q_j(t^{n+1})-q_{j,h}^{n+1}\|^2, \hspace{3mm}\forall q_{j,h}^{n+1}\in Q_h. 
+\end{align*}}
+\blue{Next, we find the upper bound of the term with coefficient $\gamma$ using Cauchy-Schwarz and Young's inequalities as}
+\blue{\begin{align*}
+    \gamma|\big(\nabla\cdot\bfeta_{\bv,j}^{n+1},\nabla\cdot\bphi_{j,h}^{n+1}\big)|&\leq\gamma\|\nabla\cdot\bfeta_{\bv,j}^{n+1}\|\|\nabla\cdot\bphi_{j,h}^{n+1}\|\\&\leq\frac{\gamma}{2}\|\nabla\cdot\bphi_{j,h}^{n+1}\|^2+\frac{\gamma}{2}\|\nabla\cdot\bfeta_{\bv,j}^{n+1}\|^2.
+\end{align*}}
+Using Taylor's series expansion about time-step size, Cauchy-Schwarz, Poincare's and Young's inequalities, the upper bound of the last term can be found as
+
+\begin{align*}
+     |G_1(t,\bv_j,\bw_j,\bphi_{j,h}^{n+1})|&\le\frac{\alpha_j}{36}\|\nabla\bphi_{j,h}^{n+1}\|^2+(\Delta{t})^4\frac{45(\nu^{'}_j+\nu^{'}_{m,j})^2}{4\alpha_j}\|\nabla\bv_{j,tt}(s_1^*)\|^2\nonumber\\&
+     +(\Delta{t})^2\frac{45(\nu_j-\nu_{m,j})^2(1-\theta)^2}{4\alpha_j}\|\nabla \bw_{j,t}(s_2^{*})\|^2\nonumber\\&
+     +(\Delta{t})^4\frac{C}{\alpha_j}\Big(\|\nabla\bw_{j,tt}(s_3^{*})\|^2\|\nabla\bv_j(t^{n+1})\|^2+\|\nabla\bw_{j,h}^{'n}\|^2\|\nabla\bv_{j,tt}(s_4^{*})\|^2+\|\bv_{j,ttt}(s_5^{*})\|^2\Big)
+\end{align*}
+
+with $s_1^*, s_2^*, s_3^*, s_4^*, s_5^*\in[t^{n-1},t^{n+1}]$. Using these estimates in \eqref{phi-introduced-first-time} and reducing produces
+
+\begin{align}
+    \frac{1}{4\Delta t}\left(\|\bphi_{j,h}^{n+1}\|^2-\|\bphi_{j,h}^{n}\|^2+\|2\bphi_{j,h}^{n+1}-\bphi_{j,h}^{n}\|^2-\|2\bphi_{j,h}^{n}-\bphi_{j,h}^{n-1}\|^2\right)\nonumber\\
+    +\Big(\frac{1}{4\Delta{t}}-\frac{C}{\alpha_j{h}^2}\|\nabla\bw_{j,h}^{'n}\|^2\Big)\|\bphi_{j,h}^{n+1}-2\bphi_{j,h}^{n}+\bphi_{j,h}^{n-1}\|^2+\frac{\bar{\nu}+\bar{\nu}_m}{\blue{4}}\|\nabla\bphi_{j,h}^{n+1}\|^2+\frac{\gamma}{4}\|\nabla\cdot\bphi_{j,h}^{n+1}\|^2\nonumber\\
+    \le(1+\theta)\frac{|\nu_j-\nu_{m,j}|}{4}\|\nabla\bpsi_{j,h}^{n}\|^2+\theta\frac{|\nu_j-\nu_{m,j}|}{4}\|\nabla\bpsi_{j,h}^{n-1}\|^2+\frac{9(1+\theta)^2(\nu_j-\nu_{m,j})^2}{4\alpha_j}\|\nabla\bfeta_{\bw,j}^{n}\|^2\nonumber\\
+    +\frac{9\theta^2(\nu_j-\nu_{m,j})^2}{4\alpha_j}\|\nabla\bfeta_{\bw,j}^{n-1}\|^2\blue{+\frac{|\nu_j^{'}+\nu_{m,j}^{'}|}{4}(2\|\nabla\bphi_{j,h}^n\|^2+\|\nabla\bphi_{j,h}^{n-1}\|^2)}+\frac{9(\bar{\nu}+\bar{\nu}_m)^2}{4\alpha_j}\|\nabla\bfeta_{\bv,j}^{n+1}\|^2\nonumber\\
+   +\frac{C}{\alpha_j}\|\nabla(2\bfeta_{\bw,j}^{n}-\bfeta_{\bw,j}^{n-1})\|^2\|\nabla\bv_j(t^{n+1})\|^2+\frac{C}{\alpha_j}\|\nabla(2\bw_{j,h}^{n}-\bw_{j,h}^{n-1})\|^2\|\nabla\bfeta_{\bv,j}^{n+1}\|^2\nonumber\\
+   +\frac{C}{\alpha_j}\|\nabla\bw_{j,h}^{'n}\|^2\|\nabla(\bfeta_{\bv,j}^{n+1}-\bfeta_{\bv,j}^{n}+\bfeta_{\bv,j}^{n-1})\|^2+\frac{C}{\alpha_j}\|\bv_{j}(t^{n+1})\|^2_{H^2}\|2\bpsi_{j,h}^{n}-\bpsi_{j,h}^{n-1}\|^2\nonumber\\
+   +(\Delta{t})^4\frac{45(\nu^{'}_j+\nu^{'}_{m,j})^2}{4\alpha_j}\|\nabla\bv_{j,tt}(s_1^*)\|^2+(\Delta{t})^2\frac{45(\nu_j-\nu_{m,j})^2(1-\theta)^2}{4\alpha_j}\|\nabla \bw_{j,t}(s_2^{*})\|^2\nonumber\\\blue{+\frac{\gamma}{2}\|\nabla\cdot\bfeta_{\bv,j}^{n+1}\|^2+\gamma^{-1}\|q_j(t^{n+1})-q_{j,h}^{n+1}\|^2}\nonumber\\
+   +(\Delta{t})^4\frac{C}{\alpha_j}\Big(\|\nabla\bw_{j,tt}(s_3^{*})\|^2\|\nabla\bv_j(t^{n+1})\|^2+\|\nabla\bw_{j,h}^{'n}\|^2\|\nabla\bv_{j,tt}(s_4^{*})\|^2+\|\bv_{j,ttt}(s_5^{*})\|^2\Big).\label{phi-combined}
+\end{align}
+Applying similar techniques to \eqref{psi-introduced-first-time}, we get
+
+\begin{align}
+    \frac{1}{4\Delta t}\left(\|\bpsi_{j,h}^{n+1}\|^2-\|\bpsi_{j,h}^{n}\|^2+\|2\bpsi_{j,h}^{n+1}-\bpsi_{j,h}^{n}\|^2-\|2\bpsi_{j,h}^{n}-\bpsi_{j,h}^{n-1}\|^2\right)\nonumber\\
+    +\Big(\frac{1}{4\Delta{t}}-\frac{C}{\alpha_j{h}^2}\|\nabla\bv_{j,h}^{'n}\|^2\Big)\|\bpsi_{j,h}^{n+1}-\bpsi_{j,h}^{n}+\bpsi_{j,h}^{n-1}\|^2+\frac{\bar{\nu}+\bar{\nu}_m}{\blue{4}}\|\nabla\bpsi_{j,h}^{n+1}\|^2+\frac{\gamma}{4}\|\nabla\cdot\bpsi_{j,h}^{n+1}\|^2\nonumber\\
+    \le(1+\theta)\frac{|\nu_j-\nu_{m,j}|}{4}\|\nabla\bphi_{j,h}^{n}\|^2+\theta\frac{|\nu_j-\nu_{m,j}|}{4}\|\nabla\bphi_{j,h}^{n-1}\|^2+\frac{9(1+\theta)^2(\nu_j-\nu_{m,j})^2}{4\alpha_j}\|\nabla\bfeta_{\bv,j}^{n}\|^2\nonumber\\
+    +\frac{9\theta^2(\nu_j-\nu_{m,j})^2}{4\alpha_j}\|\nabla\bfeta_{\bv,j}^{n-1}\|^2\blue{+\frac{|\nu_j^{'}+\nu_{m,j}^{'}|}{4}(2\|\nabla\bpsi_{j,h}^n\|^2+\|\nabla\bpsi_{j,h}^{n-1}\|^2)}+\frac{9(\bar{\nu}+\bar{\nu}_m)^2}{4\alpha_j}\|\nabla\bfeta_{\bw,j}^{n+1}\|^2\nonumber\\
+   +\frac{C}{\alpha_j}\|\nabla(2\bfeta_{\bv,j}^{n}-\bfeta_{\bv,j}^{n-1})\|^2\|\nabla\bw_j(t^{n+1})\|^2+\frac{C}{\alpha_j}\|\nabla(2\bv_{j,h}^{n}-\bv_{j,h}^{n-1})\|^2\|\nabla\bfeta_{\bw,j}^{n+1}\|^2\nonumber\\
+   +\frac{C}{\alpha_j}\|\nabla\bv_{j,h}^{'n}\|^2\|\nabla(\bfeta_{\bw,j}^{n+1}-\bfeta_{\bw,j}^{n}+\bfeta_{\bw,j}^{n-1})\|^2+\frac{C}{\alpha_j}\|\bw_{j}(t^{n+1})\|^2_{H^2}\|2\bphi_{j,h}^{n}-\bphi_{j,h}^{n-1}\|^2\nonumber\\
+   +(\Delta{t})^4\frac{45(\nu^{'}_j+\nu^{'}_{m,j})^2}{4\alpha_j}\|\nabla\bw_{j,tt}(t_1^*)\|^2+(\Delta{t})^2\frac{45(\nu_j-\nu_{m,j})^2(1-\theta)^2}{4\alpha_j}\|\nabla \bv_{j,t}(t_2^{*})\|^2\nonumber\\\blue{+\frac{\gamma}{2}\|\nabla\cdot\bfeta_{\bw,j}^{n+1}\|^2+\gamma^{-1}\|r_j(t^{n+1})-r_{j,h}^{n+1}\|^2}\nonumber\\
+   +(\Delta{t})^4\frac{C}{\alpha_j}\Big(\|\nabla\bv_{j,tt}(t_3^{*})\|^2\|\nabla\bw_j(t^{n+1})\|^2+\|\nabla\bv_{j,h}^{'n}\|^2\|\nabla\bw_{j,tt}(t_4^{*})\|^2+\|\bw_{j,ttt}(t_5^{*})\|^2\Big),\label{psi-combined}
+\end{align}
+with $t_1^{*},t_2^{*},t_3^{*},t_4^{*},t_5^{*}\in[t^{n-1},t^{n+1}]$. Now add \eqref{phi-combined} and \eqref{psi-combined},  assume
+\begin{align}
+    \Delta t\le\frac{\alpha_{\min}h^2}{C\max\limits_{1\le j\le J}\Big\{\|\nabla\bv_{j,h}^{'n}\|^2, \|\nabla\bw_{j,h}^{'n}\|^2\Big\}},
+\end{align}
+drops non-negative terms from left-hand-side, and rearrange, we have
+
+\begin{align}
+    \frac{1}{4\Delta t}\left(\|\bphi_{j,h}^{n+1}\|^2-\|\bphi_{j,h}^{n}\|^2+\|2\bphi_{j,h}^{n+1}-\bphi_{j,h}^{n}\|^2-\|2\bphi_{j,h}^{n}-\bphi_{j,h}^{n-1}\|^2\right)\nonumber\\+\frac{1}{4\Delta t}\left(\|\bpsi_{j,h}^{n+1}\|^2-\|\bpsi_{j,h}^{n}\|^2+\|2\bpsi_{j,h}^{n+1}-\bpsi_{j,h}^{n}\|^2-\|2\bpsi_{j,h}^{n}-\bpsi_{j,h}^{n-1}\|^2\right)\nonumber\\+\frac{\bar{\nu}+\bar{\nu}_m}{\blue{4}}\left(\|\nabla\bphi_{j,h}^{n+1}\|^2-\|\nabla\bphi_{j,h}^{n}\|^2+\|\nabla\bpsi_{j,h}^{n+1}\|^2-\|\nabla\bpsi_{j,h}^{n}\|^2\right)\nonumber\\+\frac{\alpha_j+\theta|\nu_j-\nu_{m,j}|+|\nu_j^{'}+\nu_{m,j}^{'}|}{4}\left(\|\nabla\bphi_{j,h}^{n}\|^2-\|\nabla\bphi_{j,h}^{n-1}\|^2+\|\nabla\bpsi_{j,h}^{n}\|^2-\|\nabla\bpsi_{j,h}^{n-1}\|^2\right)\nonumber\\
+    +\frac{\alpha_j}{\blue{4}}\left(\|\nabla\bphi_{j,h}^{n-1}\|^2+\|\nabla\bpsi_{j,h}^{n-1}\|^2\right)+\frac{\gamma}{4}\left(\|\nabla\cdot\bphi_{j,h}^{n+1}\|^2+\|\nabla\cdot\bpsi_{j,h}^{n+1}\|^2\right)\nonumber\\
+    \le\frac{9(1+\theta)^2(\nu_j-\nu_{m,j})^2}{4\alpha_j}\left(\|\nabla\bfeta_{\bv,j}^{n}\|^2+\|\nabla\bfeta_{\bw,j}^{n}\|^2\right)\nonumber\\
+    +\frac{9\theta^2(\nu_j-\nu_{m,j})^2}{4\alpha_j}\left(\|\nabla\bfeta_{\bv,j}^{n-1}\|^2+\|\nabla\bfeta_{\bw,j}^{n-1}\|^2\right)+\frac{9(\bar{\nu}+\bar{\nu}_m)^2}{4\alpha_j}\left(\|\nabla\bfeta_{\bv,j}^{n+1}\|^2+\|\nabla\bfeta_{\bw,j}^{n+1}\|^2\right)\nonumber\\
+   +\frac{C}{\alpha_j}\|\nabla(2\bfeta_{\bw,j}^{n}-\bfeta_{\bw,j}^{n-1})\|^2\|\nabla\bv_j(t^{n+1})\|^2+\frac{C}{\alpha_j}\|\nabla(2\bfeta_{\bv,j}^{n}-\bfeta_{\bv,j}^{n-1})\|^2\|\nabla\bw_j(t^{n+1})\|^2\nonumber\\+\frac{C}{\alpha_j}\|\nabla(2\bw_{j,h}^{n}-\bw_{j,h}^{n-1})\|^2\|\nabla\bfeta_{\bv,j}^{n+1}\|^2+\frac{C}{\alpha_j}\|\nabla(2\bv_{j,h}^{n}-\bv_{j,h}^{n-1})\|^2\|\nabla\bfeta_{\bw,j}^{n+1}\|^2\nonumber\\
+   +\frac{C}{\alpha_j}\|\nabla\bw_{j,h}^{'n}\|^2\|\nabla(\bfeta_{\bv,j}^{n+1}-\bfeta_{\bv,j}^{n}+\bfeta_{\bv,j}^{n-1})\|^2+\frac{C}{\alpha_j}\|\nabla\bv_{j,h}^{'n}\|^2\|\nabla(\bfeta_{\bw,j}^{n+1}-\bfeta_{\bw,j}^{n}+\bfeta_{\bw,j}^{n-1})\|^2\nonumber\\+\frac{C}{\alpha_j}\|\bv_{j}(t^{n+1})\|^2_{H^2}\|2\bpsi_{j,h}^{n}-\bpsi_{j,h}^{n-1}\|^2+\frac{C}{\alpha_j}\|\bw_{j}(t^{n+1})\|^2_{H^2}\|2\bphi_{j,h}^{n}-\bphi_{j,h}^{n-1}\|^2\nonumber\\
+   +(\Delta{t})^4\frac{45(\nu^{'}_j+\nu^{'}_{m,j})^2}{4\alpha_j}\left(\|\nabla\bv_{j,tt}(s_1^*)\|^2+\|\nabla\bw_{j,tt}(t_1^*)\|^2\right)\nonumber\\+(\Delta{t})^2\frac{45(\nu_j-\nu_{m,j})^2(1-\theta)^2}{4\alpha_j}\left(\|\nabla \bv_{j,t}(t_2^{*})\|^2+\|\nabla \bw_{j,t}(s_2^{*})\|^2\right)\nonumber\\+\frac{\gamma}{2}\left(\|\nabla\cdot\bfeta_{\bv,j}^{n+1}\|^2+\|\nabla\cdot\bfeta_{\bw,j}^{n+1}\|^2\right)+\frac{1}{\gamma}\left(\|q_j(t^{n+1})-q_{j,h}^{n+1}\|^2+\|r_j(t^{n+1})-r_{j,h}^{n+1}\|^2\right)\nonumber\\
+   +(\Delta{t})^4\frac{C}{\alpha_j}\Big(\|\nabla\bw_{j,tt}(s_3^{*})\|^2\|\nabla\bv_j(t^{n+1})\|^2+\|\nabla\bw_{j,h}^{'n}\|^2\|\nabla\bv_{j,tt}(s_4^{*})\|^2+\|\bv_{j,ttt}(s_5^{*})\|^2\Big)\nonumber\\
+   +(\Delta{t})^4\frac{C}{\alpha_j}\Big(\|\nabla\bv_{j,tt}(t_3^{*})\|^2\|\nabla\bw_j(t^{n+1})\|^2+\|\nabla\bv_{j,h}^{'n}\|^2\|\nabla\bw_{j,tt}(t_4^{*})\|^2+\|\bw_{j,ttt}(t_5^{*})\|^2\Big).\label{phi-psi-combined}
+\end{align}
+Multiply both sides by $4\Delta{t}$, use stability and regularity assumptions, $\|\bphi_{j,h}^0\|=\|\bpsi_{j,h}^0\|=\|\bphi_{j,h}^1\|=\|\bpsi_{j,h}^1\|=0$, $\Delta{t}M=T$, and sum over the time steps to find
+\begin{comment}
+\begin{align}
+    &\|\bphi_{j,h}^M\|^2+\|2\bphi_{j,h}^{M}-\bphi_{j,h}^{M-1}\|^2+\|\bpsi_{j,h}^{M}\|^2+\|2\bpsi_{j,h}^{M}-\bpsi_{j,h}^{M-1}\|^2\nonumber\\&+\alpha_j\Delta{t}\sum_{n=2}^M(\|\nabla\bphi_{j,h}^{n}\|^2+\|\nabla\bpsi_{j,h}^{n}\|^2)+\gamma\Delta t\sum_{n=2}^M\left(\|\nabla\cdot\bphi_{j,h}^n\|^2+\|\nabla\cdot\bpsi_{j,h}^n\|^2\right)\nonumber\\
+    &\leq\frac{9(1+\theta)^2(\nu_j-\nu_{m,j})^2}{\alpha_j}\Delta{t}\sum_{n=1}^{M-1}(\|\nabla\bfeta_{\bv,j}^{n}\|^2+\|\nabla\bfeta_{\bw,j}^{n}\|^2)\nonumber\\&+\frac{9\theta^2(\nu_j-\nu_{m,j})^2}{\alpha_j}\Delta{t}\sum_{n=1}^{M-1}(\|\nabla\bfeta_{\bv,j}^{n-1}\|^2+\|\nabla\bfeta_{\bw,j}^{n-1}\|^2)\nonumber\\
+    &+\frac{9(\bar{\nu}+\bar{\nu}_m)^2}{\alpha_j}\Delta{t}\sum_{n=1}^{M-1}(\|\nabla\bfeta_{\bv,j}^{n+1}\|^2+\|\nabla\bfeta_{\bw,j}^{n+1}\|^2)\nonumber\\&+\frac{C}{\alpha_j}\Delta{t}\sum_{n=1}^{M-1}\bigg\{\|\nabla(2\bfeta_{\bw,j}^{n}-\bfeta_{\bw,j}^{n-1})\|^2\|\nabla\bv_j(t^{n+1})\|^2+\|\nabla(2\bfeta_{\bv,j}^{n}-\bfeta_{\bv,j}^{n-1})\|^2\|\nabla\bw_j(t^{n+1})\|^2\bigg\}\nonumber\\
+    &+\frac{C}{\alpha_j}\Delta{t}\sum_{n=1}^{M-1}\bigg\{\|\nabla(2\bw_{j,h}^{n}-\bw_{j,h}^{n-1})\|^2\|\nabla\bfeta_{j,\bv}^{n+1}\|^2+\|\nabla(2\bv_{j,h}^{n}-\bv_{j,h}^{n-1})\|^2\|\nabla\bfeta_{\bw,j}^{n+1}\|^2\bigg\}\nonumber\\
+    &+\frac{C}{\alpha_j}\Delta{t}\sum_{n=1}^{M-1}\bigg\{\|\nabla\bw_{j,h}^{'n}\|^2\|\nabla(\bfeta_{\bv,j}^{n+1}-\bfeta_{\bv,j}^{n}+\bfeta_{\bv,j}^{n-1})\|^2+\|\nabla\bv_{j,h}^{'n}\|^2\|\nabla(\bfeta_{\bw,j}^{n+1}-\bfeta_{\bw,j}^{n}+\bfeta_{\bw,j}^{n-1})\|^2\bigg\}\nonumber\\
+    &+\frac{C}{\alpha_j}\Delta{t}\sum_{n=1}^{M-1}\bigg\{\|\bv_j(t^{n+1})\|_{H^2}^2\|2\bpsi_{j,h}^{n}-\bpsi_{j,h}^{n-1}\|^2+\|\bw_j(t^{n+1})\|_{H^2}^2\|2\bphi_{j,h}^{n}-\bphi_{j,h}^{n-1}\|^2\bigg\}\nonumber\\&+C\big((\Delta{t})^4+(\nu_j-\nu_{m,j})(1-\theta)^2(\Delta t)^2\big)\nonumber\\&+2\gamma\Delta t\sum_{n=1}^{M-1}\left(\|\nabla\cdot\bfeta_{\bv,j}^{n+1}\|^2+\|\nabla\cdot\bfeta_{\bw,j}^{n+1}\|^2\right)\nonumber\\&+\frac{4\Delta t}{\gamma}\sum_{n=1}^{M-1}\left(\|q_j(t^{n+1})-q_{j,h}^{n+1}\|^2+\|r_j(t^{n+1})-r_{j,h}^{n+1}\|^2\right).
+\end{align}
+\end{comment}
+\begin{align}
+    &\|\bphi_{j,h}^M\|^2+\|2\bphi_{j,h}^{M}-\bphi_{j,h}^{M-1}\|^2+\|\bpsi_{j,h}^{M}\|^2+\|2\bpsi_{j,h}^{M}-\bpsi_{j,h}^{M-1}\|^2\nonumber\\&+\alpha_j\Delta{t}\sum_{n=2}^M(\|\nabla\bphi_{j,h}^{n}\|^2+\|\nabla\bpsi_{j,h}^{n}\|^2)+\gamma\Delta t\sum_{n=2}^M\left(\|\nabla\cdot\bphi_{j,h}^n\|^2+\|\nabla\cdot\bpsi_{j,h}^n\|^2\right)\nonumber\\
+    &\leq\frac{C(1+\theta)^2(\nu_j-\nu_{m,j})^2}{\alpha_j}h^{2k}+\frac{C\theta^2(\nu_j-\nu_{m,j})^2}{\alpha_j}h^{2k}+\frac{C(\bar{\nu}+\bar{\nu}_m)^2}{\alpha_j}h^{2k}\nonumber\\&+\frac{C}{\alpha_j}h^{2k}\bigg (\|\bv_j(t)\|^2_{L^{\infty}\big(0,T;\bH^1(\Omega)^d\big)}+\|\bw_j(t)\|^2_{L^{\infty}\big(0,T;\bH^1(\Omega)^d\big)}\bigg)+\frac{C}{\alpha_j}h^{2k}\nonumber\\
+    &+\frac{C}{\alpha_j}\Delta{t}\sum_{n=1}^{M-1}\bigg\{\|\bv_j(t)\|_{L^{\infty}\big(0,T;\bH^2(\Omega)^d\big)}^2\|2\bpsi_{j,h}^{n}-\bpsi_{j,h}^{n-1}\|^2+\|\bw_j(t)\|_{L^{\infty}\big(0,T;\bH^2(\Omega)^d\big)}^2\|2\bphi_{j,h}^{n}-\bphi_{j,h}^{n-1}\|^2\bigg\}\nonumber\\&+C\big((\Delta{t})^4+(\nu_j-\nu_{m,j})^2(1-\theta)^2(\Delta t)^2\big)+C\gamma h^{2k}+\frac{C}{\gamma}h^{2k}.
+\end{align}
+Using triangle and Young's inequalities, dropping non-negative terms from left-hand-side, and simplifying yield 
+\begin{align}
+    \|\bphi_{j,h}^M\|^2+&\|\bpsi_{j,h}^{M}\|^2+\alpha_j\Delta{t}\sum_{n=2}^M(\|\nabla\bphi_{j,h}^{n}\|^2+\|\nabla\bpsi_{j,h}^{n}\|^2)+\gamma\Delta t\sum_{n=2}^M\left(\|\nabla\cdot\bphi_{j,h}^n\|^2+\|\nabla\cdot\bpsi_{j,h}^n\|^2\right)\nonumber\\
+    &\leq\Delta{t}\sum_{n=2}^{M-1}\frac{C}{\alpha_j}\left(\|\bphi_{j,h}^{n}\|^2+\|\bpsi_{j,h}^{n}\|^2\right)+C\big(h^{2k}+(\Delta{t})^4+(\nu_j-\nu_{m,j})^2(1-\theta)^2(\Delta t)^2\big).
+\end{align}
+Applying the discrete Gr\"onwall Lemma \ref{dgl}, we have
+\begin{align}
+    \|\bphi_{j,h}^M\|^2+\|\bpsi_{j,h}^{M}\|^2+&\alpha_j\Delta{t}\sum_{n=2}^M(\|\nabla\bphi_{j,h}^{n}\|^2+\|\nabla\bpsi_{j,h}^{n}\|^2)+\gamma\Delta t\sum_{n=2}^M\left(\|\nabla\cdot\bphi_{j,h}^n\|^2+\|\nabla\cdot\bpsi_{j,h}^n\|^2\right)\nonumber\\
+    &\leq C\exp\bigg(\frac{CT}{\alpha_j}\bigg)\big(h^{2k}+(\Delta{t})^4+(\nu_j-\nu_{m,j})^2(1-\theta)^2(\Delta t)^2\big).
+\end{align}
+Use of triangle and Young's inequalities allows us to write
+\begin{align}
+    &\|\be_{\bv,j}^M\|^2+\|\be_{\bw,j}^{M}\|^2+\alpha_j\Delta{t}\sum_{n=2}^M\left(\|\nabla\be_{\bv,j}^{n}\|^2+\|\nabla\be_{\bw,j}^{n}\|^2\right)+\gamma\Delta t\sum_{n=2}^M\left(\|\nabla\cdot\be_{\bv,j}^n\|^2+\|\nabla\cdot\be_{\bw,j}^n\|^2\right)\nonumber\\&\leq
+    2\bigg(\|\bphi_{j,h}^M\|^2+\|\bpsi_{j,h}^{M}\|^2+\alpha_j\Delta{t}\sum_{n=2}^M\left(\|\nabla\bphi_{j,h}^{n}\|^2+\|\nabla\bpsi_{j,h}^{n}\|^2\right)+\gamma\Delta t\sum_{n=2}^M\left(\|\nabla\cdot\bphi_{j,h}^n\|^2+\|\nabla\cdot\bpsi_{j,h}^n\|^2\right)\nonumber\\&+\|\bfeta_{\bv,j}^M\|^2+\|\bfeta_{\bw,j}^{M}\|^2+\alpha_j\Delta{t}\sum_{n=2}^M\left(\|\nabla\bfeta_{\bv,j}^{n}\|^2+\|\nabla\bfeta_{\bw,j}^{n}\|^2\right)+\gamma\Delta t\sum_{n=2}^M\left(\|\nabla\cdot\bfeta_{\bv,j}^n\|^2+\|\nabla\cdot\bfeta_{\bw,j}^n\|^2\right)\bigg)\nonumber\\
+    &\leq C\big(h^{2k}+(\Delta{t})^4+(\nu_j-\nu_{m,j})^2(1-\theta)^2(\Delta t)^2\big).\label{error-bound-first}
+\end{align}
+Define $<\be_v>^n:=\frac{1}{J}\sum\limits_{j=1}^J(2\be_{\bv,j}^n-\be_{\bv,j}^{n-1})$, and $<\be_w>^n:=\frac{1}{J}\sum\limits_{j=1}^J(2\be_{\bw,j}^n-\be_{\bw,j}^{n-1}),$ use triangle inequality and equation \eqref{error-bound-first}, we have
+\begin{align}
+    \|<\be_{\bv}>^M\|^2+\|<\be_{\bw}>^{M}\|^2+\alpha_{\min}\Delta{t}\sum_{n=2}^M\left(\|\nabla<\be_{\bv}>^{n}\|^2+\|\nabla<\be_{\bw}>^{n}\|^2\right)\nonumber\\+\gamma\Delta t\sum_{n=2}^M\left(\|\nabla\cdot<\be_{\bv}>^n\|^2+\|\nabla\cdot<\be_{\bw}>^n\|^2\right)\nonumber\\\leq C\bigg(h^{2k}+(\Delta{t})^4+\frac{(1-\theta)^2(\Delta t)^2}{J}\sum_{j=1}^J(\nu_j-\nu_{m,j})^2\bigg).
+\end{align}
+Substituting the original variables completes the proof.
+\end{proof}
+
+\section{Numerical Experiments}
+To test the proposed Algorithm \ref{Algn1} and the associated theory, in this section, we present results of numerical experiments. We will be employing a first-order backward-Euler \jaman{timestepping scheme given in \cite{mohebujjaman2022efficient}} using initial conditions $\bv_{j,h}^0=\bv_j(\bx,0)$, and $\bw_{j,h}^0=\bw_j(\bx,0)$ to compute the first timestep solutions $\bv_{j,h}^1$, and $\bw_{j,h}^1$. Then, the first two initial conditions $(\bv_{j,h}^0, \bw_{j,h}^0)$, and $(\bv_{j,h}^1, \bw_{j,h}^1)$ will be used in Algorithm \ref{Algn1} for further time evolution's. We will be using $J=20$ realizations, with an index of $j=1,2,\cdots,J$ in all experiments.
+
+For MHD simulations, it is crucial to enforce a solenoidal constraint $\nabla\cdot\bB_j=0$ in the discrete level, up to round-off error. Since it is known that for MHD flow simulations $\nabla\cdot\bB_j\neq0$ can produce large errors in the solution. \jaman{Thus, it is popular to use pointwise-divergence free element such as $(P_2,P_1^{disc})$ Scott-Vogelius (SV) elements on barycenter refined regular
+triangular meshes to enforce the divergence constraints \cite{AKMR15,HMR17, kuberry2012numerical,MR17,mohebujjaman2022efficient}. However, using the SV element requires higher degrees of freedom which increases the computational complexity. The proposed Algorithm \ref{Algn1} has a feature to use grad-div stabilization parameter which allows us to use weakly divergence free element without reducing the accuracy of the solutions \cite{case2011connection} with the appropriate choice of the parameter \cite{jenkins2014parameter}. Thus, we will use stable weakly divergence-free Taylor-hood (TH) element $(P_2, P_1)$ for the velocity-pressure and magnetic field-magnetic pressure pairs on regular unstructured triangular mesh with grad-div stabilization parameter $\gamma=10^5$. To estimate the viscosity parameters $\nu$, and $\nu_m$, we draw an independent sample of size $J=20$ from a uniform distribution for each parameter. In the first experiment, we verify the predicted convergence rates given in Section \ref{convergence-theorem}. We implement the scheme on a channel flow over a step problem and a regularized lid-driven cavity problem in the second and third experiments, respectively.}
+\subsection{Convergence rate verification}
+We will begin this experiment with the following manufactured analytical functions,
+\begin{align}
+    \bv =\bigg(\stackanchor{$\cos{y}+(1+e^t)\sin{y}$}{$\sin{x}+(1+e^t)\cos{x}$}\bigg),\; \bw =\bigg(\stackanchor{$\cos{y}-(1+e^t)\sin{y}$}{$\sin{x}-(1+e^t)\cos{x}$}\bigg),\;p=\sin{(x+y)}(1+e^t),\text{ and }\lambda=0.
+\end{align}
+\jaman{Clearly, $\nabla\cdot\bv=\nabla\cdot\bw=0$.} Next, \jaman{introducing a perturbation parameter $\epsilon$ we introduce noise in the above analytical functions as below to create $J=20$ different manufactured solutions:
+\begin{align}
+\bv_j(\bx,t):=\left(1+k_j\epsilon\right)\bv,\hspace{1mm} \bw_j(\bx,t):=\left(1+k_j\epsilon\right)\bw,\hspace{1mm} p_j:=(1+k_j\epsilon)p,\hspace{1mm}\text{and}\hspace{1mm}\lambda_j:=0,\label{manufactured-solution}
+\end{align}
+where $k_j=(-1)^{j+1}\lceil j/2\rceil/5$, $j\in\mathbb{N}$, and $j=1,2,\cdots, 20$. We consider the kinematic viscosity $\nu$ and magnetic diffusivity $\nu_m$ are  continuous random variables with uniform distribution. In this experiment, we consider $\nu\sim \mathcal{U}(0.0009, 0.0011)$ with $E[\nu]=0.001$,  $\nu\sim \mathcal{U}(0.009, 0.011)$ with $E[\nu]=0.01$, and $\nu_m\sim\mathcal{U}(0.0009, 0.0011)$ with $E[\nu_m]=0.001$. For each of the cases, we collect a i.i.d sample size of 20. Therefore, we have the following two two-dimensional random samples $\{(\nu_j,\nu_{m,j})\in[0.0009,0.0011]\times[0.0009,0.0011]\}$ and $\{(\nu_j,\nu_{m,j})\in[0.009,0.011]\times[0.0009,0.0011]\}$, where $j=1,2,\cdots,20$. For a fixed $j$ together with pair $(\nu_j,\nu_{m,j})$, and the analytical solution in \eqref{manufactured-solution}, we compute the forcing functions as below:
+\begin{eqnarray*}
+\bif_{1,j}=\bv_{j,t}+\bw_j\cdot\nabla \bv_j-\frac{\nu_j+\nu_{m,j}}{2}\Delta \bv_j-\frac{\nu_j-\nu_{m,j}}{2}\Delta \bw_j+\nabla q_j,\\
+\bif_{2,j}=\bw_{j,t}+\bv_j\cdot\nabla \bw_j-\frac{\nu_j+\nu_{m,j}}{2}\Delta \bw_j-\frac{\nu_j-\nu_{m,j}}{2}\Delta \bv_j+\nabla r_j.
+\end{eqnarray*}
+We use $\bv_{j,h}^0=\bv_j(\bx,0)$, and $\bw_{j,h}^0=\bw(\bx,0)$ as the first timestep initial conditions and $\bv_{j,h}|_{\partial\Omega}=\bv_j$, and $\bw_{j,h}|_{\partial\Omega}=\bw_j$ as the boundary conditions on a domain $\Omega=(0,1)^2$. Using the Algorithm \ref{Algn1}, we compute the ensemble average solution $(<\bv_h^n>,<\bw_h^n>)$ at $t=t^n$ compare with the We define the error
+For each $j$, we run the simulation and compute the ensemble average of the solutions and use it for further simulations.} To receive our temporal convergence, we will be using a fixed mesh width of $h=1/64$, end time $T=1$, and varying timestep sizes. For our spatial convergence we will be using a fixed timestep size $\Delta t=T/8$, a small end time of $T=0.001$, and successively refined meshes. Both convergences will be using a varying theta depending on our $\bar{\nu}_m$ and $\bar{\nu}_{j,m}$.
+
+\begin{table}[!ht] 
+\begin{center}
+\small\begin{tabular}{|c|c|c|c|c|c|c|c|c|}\hline
+\multicolumn{9}{|c|}{Temporal convergence (fixed $h=1/64$, $T=1$) with $j=1,2,\cdots\hspace{-0.35mm}, 20$}\\\hline
+$\hspace{-1mm}\epsilon=0.0\hspace{-1mm}$&\multicolumn{4}{|c|}{$\hspace{-1mm}\{(\nu_j,\nu_{m,j})\in[0.0009,0.0011]\times[0.0009,0.0011]\}\hspace{-1mm}$}&\multicolumn{4}{|c|}{\hspace{-1mm}$\{(\nu_j,\nu_{m,j})\in[0.009,0.011]\times[0.0009,0.0011]\}\hspace{-2mm}$}\\\hline
+$\Delta t$ & $\|\hspace{-1mm}<\hspace{-1mm}\be_{\bv}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$ & rate   &$\|\hspace{-1mm}<\hspace{-1mm}\be_{\bw}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$  & rate & $\|\hspace{-1mm}<\hspace{-1mm}\be_{\bv}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$ & rate   &$\|\hspace{-1mm}<\hspace{-1mm}\be_{\bw}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$  & rate \\ \hline
+$\frac{T}{4}$ & 5.52011e-01 & & 4.35985e-01 &  & 2.88688e-01  & & 2.49376e-01 &\\ \hline
+$\frac{T}{8}$& 1.38416e-01  & 2.00 & 1.17731e-01 & 1.89 & 8.59297e-02  & 1.75 & 7.85069e-02 & 1.67\\\hline
+$\frac{T}{16}$& 3.49164e-02  & 1.99 & 3.09697e-02 & 1.93 & 2.43083e-02  & 1.82 & 2.28422e-02 & 1.78\\\hline
+$\frac{T}{32}$& 8.71997e-03   & 2.00 & 7.89457e-03 & 1.97 & 6.42792e-03   & 1.92 & 6.17165e-03  & 1.89\\\hline
+$\frac{T}{64}$& 2.17794e-03   & 2.00 & 1.99352e-03 & 1.99 & 1.61147e-03   & 2.00 & 1.56949e-03 & 1.98\\\hline
+\end{tabular}
+\end{center}
+\caption{\footnotesize Temporal errors and convergence rates for $\bv$ and $\bw$ with $\epsilon=0.0.$ \jaman{JM says: keep four decimal places, for example, 1.5324e-05, state the mean of each of the sample you considered. That is $\bar{\nu}$, and $\bar{\nu}_m$. You may find it in your code as bnu and bnum. }}\label{temporal-convergence-ep-0.0}
+\end{table}
+
+
+\begin{table}[!ht] 
+\begin{center}
+\small\begin{tabular}{|c|c|c|c|c|c|c|c|c|}\hline
+\multicolumn{9}{|c|}{Spatial convergence (fixed $T=0.001$, $\Delta t=T/8$) with $j=1,2,\cdots\hspace{-0.35mm}, 20$}\\\hline
+$\hspace{-1mm}\epsilon=0.0\hspace{-1mm}$&\multicolumn{4}{|c|}{$\hspace{-1mm}\{(\nu_j,\nu_{m,j})\in[0.0009,0.0011]\times[0.0009,0.0011]\}\hspace{-1mm}$}&\multicolumn{4}{|c|}{\hspace{-1mm}$\{(\nu_j,\nu_{m,j})\in[0.009,0.011]\times[0.0009,0.0011]\}\hspace{-2mm}$}\\\hline
+$h$ & $\|\hspace{-1mm}<\hspace{-1mm}\be_{\bv}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$ & rate   &$\|\hspace{-1mm}<\hspace{-1mm}\be_{\bw}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$  & rate & $\|\hspace{-1mm}<\hspace{-1mm}\be_{\bv}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$ & rate   &$\|\hspace{-1mm}<\hspace{-1mm}\be_{\bw}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$  & rate \\ \hline
+$\frac{1}{4}$ &1.00742e-04  & & 1.93054e-04 &  & 1.00742e-04  & & 1.93054e-04&\\ \hline
+$\frac{1}{8}$& 2.53241e-05  &1.99 & 4.82282e-05 & 2.00 & 2.53241e-05  &1.99 & 4.82282e-05 & 2.00\\\hline
+$\frac{1}{16}$& 6.33964e-06  &2.00& 1.20549e-05 & 2.00 & 6.33964e-06  &2.00& 1.20549e-05 & 2.00\\\hline
+$\frac{1}{32}$& 1.58548e-06   &2.00& 3.0136e-06 & 2.00 & 1.58547e-06   &2.00& 3.0136e-06  & 2.00\\\hline
+$\frac{1}{64}$& 3.96504e-07   &2.00& 7.53436e-07 & 2.00 & 3.96464e-07   &2.00& 7.53422e-07 & 2.00\\\hline
+\end{tabular}
+\end{center}
+\caption{\footnotesize Spatial errors and convergence rates for $\bv$ and $\bw$ with $\epsilon=0.0.$ \jaman{JM says: keep four decimal places, for example, 1.5324e-05, state the mean of each of the sample you considered. That is $\bar{\nu}$, and $\bar{\nu}_m$.}}\label{spatial-convergence-ep-0.0}
+\end{table}
+
+
+\begin{table}[!ht] 
+\begin{center}
+\small\begin{tabular}{|c|c|c|c|c|c|c|c|c|}\hline
+\multicolumn{9}{|c|}{Temporal convergence (fixed $h=1/64$, $T=1$) with $j=1,2,\cdots\hspace{-0.35mm}, 20$}\\\hline
+$\hspace{-1mm}\jaman{\epsilon=0.001}\hspace{-1mm}$&\multicolumn{4}{|c|}{$\{(\nu_j,\nu_{m,j})\in[0.0009,0.0011]\times[0.0009,0.0011]\}\hspace{-1mm}$}&\multicolumn{4}{|c|}{$\{(\nu_j,\nu_{m,j})\in[0.009,0.011]\times[0.0009,0.0011]\}\hspace{-2mm}$}\\\hline
+$\Delta t$ & $\|\hspace{-1mm}<\hspace{-1mm}\be_{\bv}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$ & rate   &$\|\hspace{-1mm}<\hspace{-1mm}\be_{\bw}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$  & rate & $\|\hspace{-1mm}<\hspace{-1mm}\be_{\bv}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$ & rate   &$\|\hspace{-1mm}<\hspace{-1mm}\be_{\bw}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$  & rate \\ \hline
+$\frac{T}{4}$ & 5.51785e-01 & & 4.34893e-01 &  &2.88627e-01  & & 2.4927e-01&\\ \hline
+$\frac{T}{8}$& 1.38395e-01  & 2.00 & 1.17622e-01 & 1.89 & 8.59195e-02  &1.75 & 7.84919e-02 & 1.67\\\hline
+$\frac{T}{16}$& 3.49144e-02  & 1.99 & 3.09592e-02 & 1.93 & 2.43065e-02  &1.82& 2.28397e-02 & 1.78\\\hline
+$\frac{T}{32}$& 8.71973e-03   & 2.00 & 7.89324e-03 & 1.97 & 6.42754e-03   &1.92& 6.17111e-03  & 1.89\\\hline
+$\frac{T}{64}$& 2.17791e-03   & 2.00 & 1.99329e-03 & 1.99 & 1.61132e-03   &2.00& 1.5693e-03 & 1.98\\\hline
+\end{tabular}
+\end{center}
+\caption{\footnotesize Temporal errors and convergence rates for $\bv$ and $\bw$ with $\epsilon=0.001.$ \jaman{JM says: keep four decimal places, for example, 1.5324e-05, state the mean of each of the sample you considered. That is $\bar{\nu}$, and $\bar{\nu}_m$.}}\label{temporal-convergence-ep-0.001}
+\end{table}
+
+
+
+\begin{table}[!ht] 
+\begin{center}
+\small\begin{tabular}{|c|c|c|c|c|c|c|c|c|}\hline
+\multicolumn{9}{|c|}{Spatial convergence (fixed $T=0.001$, $\Delta t=T/8$) with $j=1,2,\cdots\hspace{-0.35mm}, 20$}\\\hline
+$\hspace{-1mm}\epsilon=0.001\hspace{-1mm}$&\multicolumn{4}{|c|}{$\hspace{-1mm}\{(\nu_j,\nu_{m,j})\in[0.0009,0.0011]\times[0.0009,0.0011]\}\hspace{-1mm}$}&\multicolumn{4}{|c|}{\hspace{-1mm}$\{(\nu_j,\nu_{m,j})\in[0.009,0.011]\times[0.0009,0.0011]\}\hspace{-2mm}$}\\\hline
+$h$ & $\|\hspace{-1mm}<\hspace{-1mm}\be_{\bv}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$ & rate   &$\|\hspace{-1mm}<\hspace{-1mm}\be_{\bw}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$  & rate & $\|\hspace{-1mm}<\hspace{-1mm}\be_{\bv}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$ & rate   &$\|\hspace{-1mm}<\hspace{-1mm}\be_{\bw}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$  & rate \\ \hline
+$\frac{1}{4}$ & 1.00742e-04  & & 1.93054e-04 &  & 1.00742e-04  & & 1.93054e-04&\\ \hline
+$\frac{1}{8}$& 2.53241e-05  & 1.99 & 4.82282e-05 & 2.00 & 2.53241e-05  &1.99 & 4.82282e-05 & 2.00\\\hline
+$\frac{1}{16}$& 6.33964e-06  & 2.00 & 1.20549e-05 & 2.00 & 6.33964e-06  &2.00& 1.20549e-05 & 2.00\\\hline
+$\frac{1}{32}$& 1.58548e-06   & 2.00 & 3.0136e-06 & 2.00 & 1.58547e-06   &2.00& 3.0136e-06  & 2.00\\\hline
+$\frac{1}{64}$& 3.96503e-07   & 2.00 & 7.53436e-07 & 2.00 & 3.96463e-07   &2.00& 7.53421e-07 & 2.00\\\hline
+\end{tabular}
+\end{center}
+\caption{\footnotesize Spatial errors and convergence rates for $\bv$ and $\bw$ with $\epsilon=0.001.$ \jaman{JM says: keep four decimal places, for example, 1.5324e-05, state the mean of each of the sample you considered. That is $\bar{\nu}$, and $\bar{\nu}_m$.}}\label{spatial-convergence-ep-0.001}
+\end{table}
+
+
+\begin{table}[!ht] 
+\begin{center}
+\small\begin{tabular}{|c|c|c|c|c|c|c|c|c|}\hline
+\multicolumn{9}{|c|}{Temporal convergence (fixed $h=1/64$, $T=1$) with $j=1,2,\cdots\hspace{-0.35mm}, 20$}\\\hline
+$\hspace{-1mm}\epsilon=0.01\hspace{-1mm}$&\multicolumn{4}{|c|}{$\hspace{-1mm}\{(\nu_j,\nu_{m,j})\in[0.0009,0.0011]\times[0.0009,0.0011]\}\hspace{-1mm}$}&\multicolumn{4}{|c|}{\hspace{-1mm}$\{(\nu_j,\nu_{m,j})\in[0.009,0.011]\times[0.0009,0.0011]\}\hspace{-2mm}$}\\\hline
+$\Delta t$ & $\|\hspace{-1mm}<\hspace{-1mm}\be_{\bv}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$ & rate   &$\|\hspace{-1mm}<\hspace{-1mm}\be_{\bw}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$  & rate & $\|\hspace{-1mm}<\hspace{-1mm}\be_{\bv}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$ & rate   &$\|\hspace{-1mm}<\hspace{-1mm}\be_{\bw}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$  & rate \\ \hline
+$\frac{T}{4}$ & 5.34399e-01 & & 3.76265e-01 &  & 2.83393e-01  & & 2.40285e-01&\\ \hline
+$\frac{T}{8}$& 1.36662e-01  & 1.97 & 1.10136e-01 & 1.77 & 8.50143e-02  & 1.74 & 7.71597e-02 & 1.64\\\hline
+$\frac{T}{16}$& 3.47351e-02  & 1.98 & 3.00877e-02 & 1.87 & 2.41493e-02  & 1.82 & 2.26132e-02 & 1.77\\\hline
+$\frac{T}{32}$& 8.69557e-03   & 2.00 & 7.76776e-03 & 1.95 & 6.39415e-03   & 1.92 & 6.12248e-03  & 1.88\\\hline
+$\frac{T}{64}$& 2.17327e-03   & 2.00 & 1.96847e-03 & 1.98 & 1.60296e-03   & 2.00 & 1.55706e-03 & 1.98\\\hline
+\end{tabular}
+\end{center}
+\caption{\footnotesize Temporal errors and convergence rates for $\bv$ and $\bw$ with $\epsilon=0.01.$ \jaman{JM says: keep four decimal places, for example, 1.5324e-05, state the mean of each of the sample you considered. That is $\bar{\nu}$, and $\bar{\nu}_m$.}}\label{temporal-convergence-ep-0.01}
+\end{table}
+
+
+\begin{table}[!ht] 
+\begin{center}
+\small\begin{tabular}{|c|c|c|c|c|c|c|c|c|}\hline
+\multicolumn{9}{|c|}{Spatial convergence (fixed $T=0.001$, $\Delta t=T/8$) with $j=1,2,\cdots\hspace{-0.35mm}, 20$}\\\hline
+$\hspace{-1mm}\epsilon=0.01\hspace{-1mm}$&\multicolumn{4}{|c|}{$\hspace{-1mm}\{(\nu_j,\nu_{m,j})\in[0.0009,0.0011]\times[0.0009,0.0011]\}\hspace{-1mm}$}&\multicolumn{4}{|c|}{\hspace{-1mm}$\{(\nu_j,\nu_{m,j})\in[0.009,0.011]\times[0.0009,0.0011]\}\hspace{-2mm}$}\\\hline
+$h$ & $\|\hspace{-1mm}<\hspace{-1mm}\be_{\bv}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$ & rate   &$\|\hspace{-1mm}<\hspace{-1mm}\be_{\bw}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$  & rate & $\|\hspace{-1mm}<\hspace{-1mm}\be_{\bv}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$ & rate   &$\|\hspace{-1mm}<\hspace{-1mm}\be_{\bw}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$  & rate \\ \hline
+$\frac{1}{4}$ &1.00742e-04  & & 1.93054e-04 &  & 1.00742e-04  & & 1.93054e-04&\\ \hline
+$\frac{1}{8}$& 2.53241e-05  &1.99 & 4.82282e-05 & 2.00 & 2.53241e-05  &1.99 & 4.82282e-05 & 2.00\\\hline
+$\frac{1}{16}$& 6.33964e-06  &2.00& 1.20549e-05 & 2.00 & 6.33964e-06  &2.00& 1.20549e-05 & 2.00\\\hline
+$\frac{1}{32}$& 1.58548e-06   &2.00& 3.0136e-06 & 2.00 & 1.58547e-06   &2.00& 3.0136e-06  & 2.00\\\hline
+$\frac{1}{64}$& 3.96502e-07   &2.00& 7.53435e-07 & 2.00 & 3.96463e-07   &2.00& 7.53421e-07 & 2.00\\\hline
+\end{tabular}
+\end{center}
+\caption{\footnotesize Spatial errors and convergence rates for $\bv$ and $\bw$ with $\epsilon=0.01.$ \jaman{JM says: keep four decimal places, for example, 1.5324e-05, state the mean of each of the sample you considered. That is $\bar{\nu}$, and $\bar{\nu}_m$.}}\label{spatial-convergence-ep-0.01}
+\end{table}
+
+
+
+
+
+
+\begin{table}[!ht] 
+\begin{center}
+\small\begin{tabular}{|c|c|c|c|c|c|c|c|c|}\hline
+\multicolumn{9}{|c|}{Temporal convergence (fixed $h=1/64$, $T=1$) with $j=1,2,\cdots\hspace{-0.35mm}, 20$}\\\hline
+$\hspace{-1mm}\epsilon=0.05\hspace{-1mm}$&\multicolumn{4}{|c|}{$\hspace{-1mm}\{(\nu_j,\nu_{m,j})\in[0.0009,0.0011]\times[0.0009,0.0011]\}\hspace{-1mm}$}&\multicolumn{4}{|c|}{\hspace{-1mm}$\{(\nu_j,\nu_{m,j})\in[0.009,0.011]\times[0.0009,0.0011]\}\hspace{-2mm}$}\\\hline
+$\Delta t$ & $\|\hspace{-1mm}<\hspace{-1mm}\be_{\bv}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$ & rate   &$\|\hspace{-1mm}<\hspace{-1mm}\be_{\bw}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$  & rate & $\|\hspace{-1mm}<\hspace{-1mm}\be_{\bv}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$ & rate   &$\|\hspace{-1mm}<\hspace{-1mm}\be_{\bw}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$  & rate \\ \hline
+$\frac{T}{4}$ & 4.58602e-01 & & 2.51508e-01 &  & 2.39362e-01  & & 1.80625e-01 &\\ \hline
+$\frac{T}{8}$& 1.23634e-01  & 1.89 & 7.5352e-02 & 1.74 & 7.44541e-02  & 1.68 & 6.25631e-02 & 1.53\\\hline
+$\frac{T}{16}$& 3.23776e-02  & 1.93 & 2.13327e-02 & 1.82 & 2.15325e-02  & 1.79 & 1.88807e-02 & 1.73\\\hline
+$\frac{T}{32}$& 8.2388e-03   & 1.97 & 5.6571e-03 & 1.91 & 5.71367e-03   & 1.91 & 5.1377e-03  & 1.88\\\hline
+$\frac{T}{64}$& 2.07469e-03   & 1.99 & 1.45509e-03 & 1.96 & 1.42224e-03   & 2.01 & 1.29303e-03 & 1.99\\\hline
+\end{tabular}
+\end{center}
+\caption{\footnotesize Temporal errors and convergence rates for $\bv$ and $\bw$ with $\epsilon=0.05.$ \jaman{JM says: keep four decimal places, for example, 1.5324e-05, state the mean of each of the sample you considered. That is $\bar{\nu}$, and $\bar{\nu}_m$.}}\label{temporal-convergence-ep-0.05}
+\end{table}
+
+\begin{table}[!ht] 
+\begin{center}
+\small\begin{tabular}{|c|c|c|c|c|c|c|c|c|}\hline
+\multicolumn{9}{|c|}{Spatial convergence (fixed $T=0.001$, $\Delta t=T/8$) with $j=1,2,\cdots\hspace{-0.35mm}, 20$}\\\hline
+$\hspace{-1mm}\epsilon=0.05\hspace{-1mm}$&\multicolumn{4}{|c|}{$\hspace{-1mm}\{(\nu_j,\nu_{m,j})\in[0.0009,0.0011]\times[0.0009,0.0011]\}\hspace{-1mm}$}&\multicolumn{4}{|c|}{\hspace{-1mm}$\{(\nu_j,\nu_{m,j})\in[0.009,0.011]\times[0.0009,0.0011]\}\hspace{-2mm}$}\\\hline
+$h$ & $\|\hspace{-1mm}<\hspace{-1mm}\be_{\bv}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$ & rate   &$\|\hspace{-1mm}<\hspace{-1mm}\be_{\bw}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$  & rate & $\|\hspace{-1mm}<\hspace{-1mm}\be_{\bv}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$ & rate   &$\|\hspace{-1mm}<\hspace{-1mm}\be_{\bw}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$  & rate \\ \hline
+$\frac{1}{4}$ & 1.00742e-04  & & 1.93054e-04 & & 1.00742e-04  & & 1.93054e-04 & \\ \hline
+$\frac{1}{8}$ & 2.53241e-05  & 1.99 & 4.82282e-05 & 2.00 & 2.53241e-05  & 1.99 & 4.82282e-05 & 2.00  \\\hline
+$\frac{1}{16}$ & 6.33964e-06  & 2.00 & 1.20549e-05 & 2.00 & 6.33964e-06  & 2.00 & 1.20549e-05 & 2.00 \\\hline
+$\frac{1}{32}$ & 1.58548e-06 & 2.00 & 3.0136e-06  & 2.00 & 1.58547e-06 & 2.00 & 3.01359e-06 & 2.00 \\\hline
+$\frac{1}{64}$ & 3.96498e-07   & 2.00 & 7.53419e-07 & 2.00 & 3.96457e-07 & 2.00 & 7.53407e-07 & 2.00 \\\hline
+\end{tabular}
+\end{center}
+\caption{\footnotesize Spatial errors and convergence rates for $\bv$ and $\bw$ with $\epsilon=0.05.$ \jaman{JM says: keep four decimal places, for example, 1.5324e-05, state the mean of each of the sample you considered. That is $\bar{\nu}$, and $\bar{\nu}_m$.}}\label{spatial-convergence-ep-0.05}
+\end{table}
+
+
+\begin{table}[!ht] 
+\begin{center}
+\small\begin{tabular}{|c|c|c|c|c|c|c|c|c|}\hline
+\multicolumn{9}{|c|}{Temporal convergence (fixed $h=1/64$, $T=1$) with $j=1,2,\cdots\hspace{-0.35mm}, 20$}\\\hline
+$\hspace{-1mm}\epsilon=0.1\hspace{-1mm}$&\multicolumn{4}{|c|}{$\hspace{-1mm}\{(\nu_j,\nu_{m,j})\in[0.0009,0.0011]\times[0.0009,0.0011]\}\hspace{-1mm}$}&\multicolumn{4}{|c|}{\hspace{-1mm}$\{(\nu_j,\nu_{m,j})\in[0.009,0.011]\times[0.0009,0.0011]\}\hspace{-2mm}$}\\\hline
+$\Delta t$ & $\|\hspace{-1mm}<\hspace{-1mm}\be_{\bv}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$ & rate   &$\|\hspace{-1mm}<\hspace{-1mm}\be_{\bw}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$  & rate & $\|\hspace{-1mm}<\hspace{-1mm}\be_{\bv}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$ & rate   &$\|\hspace{-1mm}<\hspace{-1mm}\be_{\bw}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$  & rate \\ \hline
+$\frac{T}{4}$ & 3.9622e-01 & & 1.74575e-01 &  & 2.83393e-01  & & 2.40285e-01 &\\ \hline
+$\frac{T}{8}$& 1.08233e-01  & 1.87 & 5.35358e-02 & 1.71 & 8.50143e-02  & 1.74 & 7.71597e-02 & 1.64\\\hline
+$\frac{T}{16}$& 2.86105e-02  & 1.92 & 1.71693e-02 & 1.64 & 2.41493e-02  & 1.82 & 2.26132e-02 & 1.77\\\hline
+$\frac{T}{32}$& 7.32551e-03   & 1.97 & 4.93158e-03 & 1.80 & 6.39415e-03   & 1.92 & 6.12248e-03  & 1.88\\\hline
+$\frac{T}{64}$& 1.85535e-03   & 1.98 & 1.2883e-03 & 1.94 & 1.60296e-03   & 2.00 & 1.55706e-03 & 1.98\\\hline
+\end{tabular}
+\end{center}
+\caption{\footnotesize Temporal errors and convergence rates for $\bv$ and $\bw$ with $\epsilon=0.1.$ \jaman{JM says: keep four decimal places, for example, 1.5324e-05, state the mean of each of the sample you considered. That is $\bar{\nu}$, and $\bar{\nu}_m$.}}\label{temporal-convergence-ep-0.1}
+\end{table}
+
+\begin{table}[!ht] 
+\begin{center}
+\small\begin{tabular}{|c|c|c|c|c|c|c|c|c|}\hline
+\multicolumn{9}{|c|}{Spatial convergence (fixed $T=0.001$, $\Delta t=T/8$) with $j=1,2,\cdots\hspace{-0.35mm}, 20$}\\\hline
+$\hspace{-1mm}\epsilon=0.1\hspace{-1mm}$&\multicolumn{4}{|c|}{$\hspace{-1mm}\{(\nu_j,\nu_{m,j})\in[0.0009,0.0011]\times[0.0009,0.0011]\}\hspace{-1mm}$}&\multicolumn{4}{|c|}{\hspace{-1mm}$\{(\nu_j,\nu_{m,j})\in[0.009,0.011]\times[0.0009,0.0011]\}\hspace{-2mm}$}\\\hline
+$h$ & $\|\hspace{-1mm}<\hspace{-1mm}\be_{\bv}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$ & rate   &$\|\hspace{-1mm}<\hspace{-1mm}\be_{\bw}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$  & rate & $\|\hspace{-1mm}<\hspace{-1mm}\be_{\bv}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$ & rate   &$\|\hspace{-1mm}<\hspace{-1mm}\be_{\bw}\hspace{-1mm}>\hspace{-1mm}\|_{2,1}$  & rate \\ \hline
+$\frac{1}{4}$ & 1.00742e-04  & & 1.93054e-04 &  & 1.00742e-04  & & 1.93054e-04 &\\ \hline
+$\frac{1}{8}$& 2.53241e-05  & 1.99 & 4.82282e-05 & 2.00 & 2.53241e-05  & 1.99 & 4.82282e-05 & 2.00 \\\hline
+$\frac{1}{16}$& 6.33964e-06  & 2.00 & 1.20549e-05 & 2.00 & 6.33964e-06  & 2.00 & 1.20549e-05 & 2.00\\\hline
+$\frac{1}{32}$& 1.58548e-06   & 2.00 & 3.0136e-06 & 2.00 & 1.58547e-06 & 2.00 & 3.01359e-06  & 2.00\\\hline
+$\frac{1}{64}$& 3.96487e-07   & 2.00 & 7.53421e-07 & 2.00 & 3.96445e-07   & 2.00 & 7.53406e-07 & 2.00\\\hline
+\end{tabular}
+\end{center}
+\caption{\footnotesize Spatial errors and convergence rates for $\bv$ and $\bw$ with $\epsilon=0.1.$ \jaman{JM says: keep four decimal places, for example, 1.5324e-05, state the mean of each of the sample you considered. That is $\bar{\nu}$, and $\bar{\nu}_m$.}}\label{spatial-convergence-ep-0.1}
+\end{table}
+
+\subsection{Flow past a unit step}
+\subsection{Lid-driven cavity problem}
+
+
+\section{Conclusion and Future Research Directions}
+
+\bibliographystyle{plain}
+% mike
+\bibliography{High_order_MHD_ensemble}
+\end{document}
+  
